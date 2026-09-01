@@ -6,7 +6,7 @@
 | 1 | Authentication + RBAC + Supabase | ✅ Complete |
 | 2 | Patients + addresses | ✅ Complete |
 | 3 | Zones + zone rules | ✅ Complete |
-| 4 | Agents + availability | ⏳ Pending |
+| 4 | Agents + availability | ✅ Complete |
 | 5 | Collections + assignment engine | ⏳ Pending |
 | 6 | Agent mobile interface | ⏳ Pending |
 | 7 | Samples + reports | ⏳ Pending |
