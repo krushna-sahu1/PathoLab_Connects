@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { patientService } from '@/services/patient.service';
+import { zoneService } from '@/services/zone.service';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
@@ -10,23 +10,13 @@ export async function GET(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { searchParams } = new URL(request.url);
-    const result = await patientService.getPatients({
-      search: searchParams.get('search') ?? undefined,
-      status: searchParams.get('status') ?? undefined,
-      page: parseInt(searchParams.get('page') ?? '1', 10),
-    });
-    return NextResponse.json(result);
+    const includeInactive = searchParams.get('includeInactive') === 'true';
+    const zones = await zoneService.getZones({ includeInactive });
+    return NextResponse.json({ zones });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Internal server error' },
       { status: 500 }
     );
   }
-}
-
-export async function POST(request: NextRequest) {
-  return NextResponse.json(
-    { message: 'Use Server Actions for patient creation' },
-    { status: 405 }
-  );
 }
