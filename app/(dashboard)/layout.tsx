@@ -1,4 +1,26 @@
-// TODO Phase 1 — protected layout with RBAC guard
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return <div className="dashboard-layout">{children}</div>;
+import { redirect } from 'next/navigation';
+import { getSessionUser } from '@/lib/auth/session';
+import { Sidebar } from '@/components/dashboard/sidebar';
+import { TopBar } from '@/components/dashboard/topbar';
+
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const user = await getSessionUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-gray-100">
+      <Sidebar user={user} />
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <TopBar user={user} />
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      </div>
+    </div>
+  );
 }

@@ -3,7 +3,7 @@
 | Phase | Focus | Status |
 |---|---|---|
 | 0 | Architecture, folder structure, types, stubs, migrations, docs | ✅ Complete |
-| 1 | Authentication + RBAC + Supabase | ⏳ Pending |
+| 1 | Authentication + RBAC + Supabase | ✅ Complete |
 | 2 | Patients + addresses | ⏳ Pending |
 | 3 | Zones + zone rules | ⏳ Pending |
 | 4 | Agents + availability | ⏳ Pending |
@@ -17,4 +17,4 @@
 ## Rules
 - Do NOT implement everything at once.
 - After each phase, test before continuing.
-- Wait for explicit instruction "Start implementation." before starting Phase 1.
+- Wait for explicit "continue" before starting the next phase.
