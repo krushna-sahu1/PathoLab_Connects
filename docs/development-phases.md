@@ -8,7 +8,7 @@
 | 3 | Zones + zone rules | ✅ Complete |
 | 4 | Agents + availability | ✅ Complete |
 | 5 | Collections + assignment engine | ✅ Complete |
-| 6 | Agent mobile interface | ⏳ Pending |
+| 6 | Agent mobile interface | ✅ Complete |
 | 7 | Samples + reports | ⏳ Pending |
 | 8 | Tickets | ⏳ Pending |
 | 9 | Twilio WhatsApp | ⏳ Pending |

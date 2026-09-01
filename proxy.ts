@@ -5,9 +5,6 @@ import { createServerClient } from '@supabase/ssr';
 // Routes that don't need authentication
 const PUBLIC_ROUTES = ['/', '/login', '/auth/callback'];
 
-// Routes only accessible by agents (mobile)
-const AGENT_ROUTES = ['/agent'];
-
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -48,10 +45,18 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Authenticated user going to login page — redirect to dashboard
+  // Authenticated user going to login page — smart redirect
   if (user && pathname === '/login') {
+    // Check if user is a field agent by looking up the agents table
+    const { data: agentRecord } = await supabase
+      .from('agents')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = '/dashboard';
+    // Agents go to /agent, everyone else to /dashboard
+    redirectUrl.pathname = agentRecord ? '/agent' : '/dashboard';
     return NextResponse.redirect(redirectUrl);
   }
 
