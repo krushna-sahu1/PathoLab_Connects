@@ -46,3 +46,27 @@ CREATE POLICY "whatsapp_conversations: staff can read"
 CREATE POLICY "whatsapp_messages: staff can read"
   ON public.whatsapp_messages FOR SELECT
   USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "zones: staff can read"
+  ON public.zones FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "zone_rules: staff can read"
+  ON public.zone_rules FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "agents: staff can read"
+  ON public.agents FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "agent_availability: staff can read"
+  ON public.agent_availability FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "patient_addresses: staff can read"
+  ON public.patient_addresses FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "collection_status_history: staff can read"
+  ON public.collection_status_history FOR SELECT
+  USING (auth.uid() IS NOT NULL);
