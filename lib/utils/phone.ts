@@ -7,8 +7,8 @@ export function normalizePhone(raw: string): string {
 
 /** Format a stored phone for Twilio WhatsApp (`whatsapp:+91XXXXXXXXXX`). */
 export function toWhatsAppAddress(phone: string): string {
+  if (phone.startsWith('whatsapp:')) return phone;
   const digits = normalizePhone(phone);
-  if (digits.startsWith('whatsapp:')) return phone;
   if (digits.length === 10) return `whatsapp:+91${digits}`;
   return `whatsapp:+${digits}`;
 }

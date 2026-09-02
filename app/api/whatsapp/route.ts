@@ -8,6 +8,12 @@ export async function POST(request: Request) {
     let body = '';
 
     if (contentType.includes('application/json')) {
+      const supabase = await (await import('@/lib/supabase/server')).createServerSupabaseClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
       const json = (await request.json()) as { from?: string; body?: string; From?: string; Body?: string };
       from = json.from ?? json.From ?? '';
       body = json.body ?? json.Body ?? '';
