@@ -6,8 +6,9 @@ import { patientService } from '@/services/patient.service';
 import { createPatientSchema, updatePatientSchema, createAddressSchema } from '@/lib/validation/patient';
 import { requireAuth, requireRole } from '@/lib/auth/session';
 import { writeAuditLog } from '@/lib/auth/audit';
+import { firstZodMessage } from '@/lib/utils/zod';
 
-export async function createPatientAction(formData: FormData) {
+export async function createPatientAction(_prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin']);
 
   const raw = {
@@ -21,7 +22,7 @@ export async function createPatientAction(formData: FormData) {
 
   const parsed = createPatientSchema.safeParse(raw);
   if (!parsed.success) {
-    return { error: parsed.error.errors[0].message };
+    return { error: firstZodMessage(parsed.error) };
   }
 
   try {
@@ -40,7 +41,7 @@ export async function createPatientAction(formData: FormData) {
   }
 }
 
-export async function updatePatientAction(id: string, formData: FormData) {
+export async function updatePatientAction(id: string, _prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin']);
 
   const raw = {
@@ -54,7 +55,7 @@ export async function updatePatientAction(id: string, formData: FormData) {
 
   const parsed = updatePatientSchema.safeParse(raw);
   if (!parsed.success) {
-    return { error: parsed.error.errors[0].message };
+    return { error: firstZodMessage(parsed.error) };
   }
 
   try {
@@ -74,7 +75,7 @@ export async function updatePatientAction(id: string, formData: FormData) {
   }
 }
 
-export async function addAddressAction(patientId: string, formData: FormData) {
+export async function addAddressAction(patientId: string, _prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin']);
 
   const raw = {
@@ -88,7 +89,7 @@ export async function addAddressAction(patientId: string, formData: FormData) {
 
   const parsed = createAddressSchema.safeParse(raw);
   if (!parsed.success) {
-    return { error: parsed.error.errors[0].message };
+    return { error: firstZodMessage(parsed.error) };
   }
 
   try {

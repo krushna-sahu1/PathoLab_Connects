@@ -44,7 +44,11 @@ export function UserRowActions({
       <button
         type="button"
         disabled={toggling}
-        onClick={() => startToggle(() => setUserActiveAction(userId, !isActive))}
+        onClick={() => {
+          startToggle(() => {
+            void setUserActiveAction(userId, !isActive);
+          });
+        }}
         className="rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50"
       >
         {isActive ? 'Deactivate' : 'Activate'}

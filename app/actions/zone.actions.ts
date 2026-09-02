@@ -6,8 +6,9 @@ import { zoneService } from '@/services/zone.service';
 import { createZoneSchema, createZoneRuleSchema } from '@/lib/validation/zone';
 import { requireRole } from '@/lib/auth/session';
 import { writeAuditLog } from '@/lib/auth/audit';
+import { firstZodMessage } from '@/lib/utils/zod';
 
-export async function createZoneAction(formData: FormData) {
+export async function createZoneAction(_prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin', 'logistics_manager']);
 
   const raw = {
@@ -18,7 +19,7 @@ export async function createZoneAction(formData: FormData) {
   };
 
   const parsed = createZoneSchema.safeParse(raw);
-  if (!parsed.success) return { error: parsed.error.errors[0].message };
+  if (!parsed.success) return { error: firstZodMessage(parsed.error) };
 
   try {
     const zone = await zoneService.createZone(parsed.data);
@@ -36,7 +37,7 @@ export async function createZoneAction(formData: FormData) {
   }
 }
 
-export async function updateZoneAction(id: string, formData: FormData) {
+export async function updateZoneAction(id: string, _prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin', 'logistics_manager']);
 
   const raw = {
@@ -47,7 +48,7 @@ export async function updateZoneAction(id: string, formData: FormData) {
   };
 
   const parsed = createZoneSchema.safeParse(raw);
-  if (!parsed.success) return { error: parsed.error.errors[0].message };
+  if (!parsed.success) return { error: firstZodMessage(parsed.error) };
 
   try {
     await zoneService.updateZone(id, parsed.data);
@@ -66,7 +67,7 @@ export async function updateZoneAction(id: string, formData: FormData) {
   }
 }
 
-export async function addZoneRuleAction(zoneId: string, formData: FormData) {
+export async function addZoneRuleAction(zoneId: string, _prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin', 'logistics_manager']);
 
   const raw = {
@@ -75,7 +76,7 @@ export async function addZoneRuleAction(zoneId: string, formData: FormData) {
   };
 
   const parsed = createZoneRuleSchema.safeParse(raw);
-  if (!parsed.success) return { error: parsed.error.errors[0].message };
+  if (!parsed.success) return { error: firstZodMessage(parsed.error) };
 
   try {
     await zoneService.addZoneRule(zoneId, parsed.data);

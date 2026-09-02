@@ -6,10 +6,11 @@ import { agentService } from '@/services/agent.service';
 import { createAgentSchema, updateAgentStatusSchema } from '@/lib/validation/agent';
 import { requireRole } from '@/lib/auth/session';
 import { writeAuditLog } from '@/lib/auth/audit';
+import { firstZodMessage } from '@/lib/utils/zod';
 
 const DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'] as const;
 
-export async function createAgentAction(formData: FormData) {
+export async function createAgentAction(_prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin', 'logistics_manager']);
 
   const workingDays = DAYS.filter((d) => formData.get(`day_${d}`) === 'on');
@@ -26,7 +27,7 @@ export async function createAgentAction(formData: FormData) {
   };
 
   const parsed = createAgentSchema.safeParse(raw);
-  if (!parsed.success) return { error: parsed.error.errors[0].message };
+  if (!parsed.success) return { error: firstZodMessage(parsed.error) };
 
   try {
     const agent = await agentService.createAgent(parsed.data);
@@ -44,7 +45,7 @@ export async function createAgentAction(formData: FormData) {
   }
 }
 
-export async function updateAgentAction(id: string, formData: FormData) {
+export async function updateAgentAction(id: string, _prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin', 'logistics_manager']);
 
   const workingDays = DAYS.filter((d) => formData.get(`day_${d}`) === 'on');
@@ -60,7 +61,7 @@ export async function updateAgentAction(id: string, formData: FormData) {
   };
 
   const parsed = createAgentSchema.safeParse(raw);
-  if (!parsed.success) return { error: parsed.error.errors[0].message };
+  if (!parsed.success) return { error: firstZodMessage(parsed.error) };
 
   try {
     await agentService.updateAgent(id, parsed.data);
@@ -79,11 +80,11 @@ export async function updateAgentAction(id: string, formData: FormData) {
   }
 }
 
-export async function updateAgentStatusAction(id: string, formData: FormData) {
+export async function updateAgentStatusAction(id: string, _prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin', 'logistics_manager']);
 
   const parsed = updateAgentStatusSchema.safeParse({ status: formData.get('status') });
-  if (!parsed.success) return { error: parsed.error.errors[0].message };
+  if (!parsed.success) return { error: firstZodMessage(parsed.error) };
 
   try {
     await agentService.updateAgentStatus(id, parsed.data.status);
@@ -102,7 +103,7 @@ export async function updateAgentStatusAction(id: string, formData: FormData) {
   }
 }
 
-export async function setAgentAvailabilityAction(agentId: string, formData: FormData) {
+export async function setAgentAvailabilityAction(agentId: string, _prev: unknown, formData: FormData) {
   await requireRole(['super_admin', 'operations_admin', 'logistics_manager']);
 
   const date = formData.get('date') as string;

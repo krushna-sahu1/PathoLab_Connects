@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { loginSchema, type LoginInput } from '@/lib/validation/auth';
+import { firstZodMessage } from '@/lib/utils/zod';
 
 export function LoginForm() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export function LoginForm() {
 
     const parsed = loginSchema.safeParse(form);
     if (!parsed.success) {
-      setError(parsed.error.errors[0].message);
+      setError(firstZodMessage(parsed.error));
       return;
     }
 
