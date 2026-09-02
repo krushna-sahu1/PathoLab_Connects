@@ -6,20 +6,22 @@ async function getStats() {
   try {
     const supabase = await createServerSupabaseClient();
     const today = new Date().toISOString().slice(0, 10);
-    const [patientsRes, collectionsRes, inTransitRes, newRes] = await Promise.all([
+    const [patientsRes, collectionsRes, inTransitRes, newRes, ticketsRes] = await Promise.all([
       supabase.from('patients').select('id', { count: 'exact', head: true }),
       supabase.from('collections').select('id', { count: 'exact', head: true }).eq('date', today).not('status', 'in', '(cancelled,rescheduled)'),
       supabase.from('samples').select('id', { count: 'exact', head: true }).eq('status', 'in_transit'),
       supabase.from('collections').select('id', { count: 'exact', head: true }).eq('status', 'new').is('agent_id', null),
+      supabase.from('tickets').select('id', { count: 'exact', head: true }).in('status', ['open', 'assigned', 'in_progress', 'waiting']),
     ]);
     return {
       patients: patientsRes.count ?? 0,
       collectionsToday: collectionsRes.count ?? 0,
       samplesInTransit: inTransitRes.count ?? 0,
       opsQueue: newRes.count ?? 0,
+      openTickets: ticketsRes.count ?? 0,
     };
   } catch {
-    return { patients: 0, collectionsToday: 0, samplesInTransit: 0, opsQueue: 0 };
+    return { patients: 0, collectionsToday: 0, samplesInTransit: 0, opsQueue: 0, openTickets: 0 };
   }
 }
 
@@ -34,7 +36,7 @@ export default async function DashboardPage() {
         <p className="mt-1 text-sm text-gray-500">Welcome back, {user.full_name}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard label="Patients" value={String(stats.patients)} icon="👤" href="/patients" />
         <StatCard label="Collections Today" value={String(stats.collectionsToday)} icon="🧪" href="/collections" />
         <StatCard label="Samples In Transit" value={String(stats.samplesInTransit)} icon="🔬" href="/samples" />
@@ -44,6 +46,13 @@ export default async function DashboardPage() {
           icon="⚠️"
           href="/collections?status=new"
           highlight={stats.opsQueue > 0}
+        />
+        <StatCard
+          label="Open Tickets"
+          value={String(stats.openTickets)}
+          icon="🎫"
+          href="/tickets"
+          highlight={stats.openTickets > 0}
         />
       </div>
 

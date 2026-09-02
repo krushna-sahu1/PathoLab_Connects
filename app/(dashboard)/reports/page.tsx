@@ -20,7 +20,7 @@ export default async function ReportsPage() {
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Sample</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Patient</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Report Date</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Delivered</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
@@ -42,10 +42,14 @@ export default async function ReportsPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-700">{report.report_date}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      report.is_delivered ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+                      report.status === 'delivered'
+                        ? 'bg-green-100 text-green-700'
+                        : report.status === 'ready'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : 'bg-gray-100 text-gray-700'
                     }`}>
-                      {report.is_delivered ? 'Delivered' : 'Pending'}
+                      {report.status ?? 'pending'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">

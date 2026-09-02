@@ -10,6 +10,7 @@ export interface Report {
   file_path?: string;
   report_date?: string;
   report_ready_at?: ISO8601;
+  lab_remarks?: string;
   created_at: ISO8601;
   updated_at: ISO8601;
 }

@@ -17,10 +17,9 @@ export const updateSampleStatusSchema = z.object({
 
 export const createReportSchema = z.object({
   sample_id: z.string().uuid(),
-  report_url: z.string().url('Enter a valid URL to the report PDF').optional().or(z.literal('')),
+  file_path: z.string().url('Enter a valid URL to the report PDF').optional().or(z.literal('')),
   report_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date'),
   lab_remarks: z.string().optional().or(z.literal('')),
-  is_delivered: z.coerce.boolean().default(false),
 });
 
 export type UpdateSampleStatusInput = z.infer<typeof updateSampleStatusSchema>;

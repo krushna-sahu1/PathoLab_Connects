@@ -3,11 +3,21 @@ import type { UUID, ISO8601 } from './common';
 export type MessageDirection = 'inbound' | 'outbound';
 export type MessageStatus = 'sent' | 'delivered' | 'read' | 'failed';
 
+export type WhatsAppMenuState =
+  | 'main'
+  | 'booking_address'
+  | 'booking_date'
+  | 'booking_slot'
+  | 'query_category'
+  | 'query_description';
+
 export interface WhatsAppConversation {
   id: UUID;
   patient_id?: UUID;
   phone: string;
-  last_message_at: ISO8601;
+  last_message_at?: ISO8601;
+  menu_state: WhatsAppMenuState;
+  context: Record<string, unknown>;
   created_at: ISO8601;
   updated_at: ISO8601;
 }

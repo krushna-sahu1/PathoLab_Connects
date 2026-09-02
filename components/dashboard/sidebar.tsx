@@ -22,6 +22,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Samples', href: '/samples', icon: '🔬', permission: 'samples:read' },
   { label: 'Reports', href: '/reports', icon: '📄', permission: 'reports:read' },
   { label: 'Tickets', href: '/tickets', icon: '🎫', permission: 'tickets:read' },
+  { label: 'WhatsApp', href: '/whatsapp', icon: '💬', permission: 'whatsapp:read' },
   { label: 'Users', href: '/users', icon: '👥', permission: 'users:read' },
   { label: 'Audit Logs', href: '/audit-logs', icon: '📋', permission: 'audit:read' },
   { label: 'Settings', href: '/settings', icon: '⚙️', permission: 'settings:read' },

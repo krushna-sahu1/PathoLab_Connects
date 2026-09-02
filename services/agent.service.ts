@@ -119,7 +119,7 @@ export const agentService = {
    * Used by Phase 5 collection assignment engine.
    */
   async isAgentAvailableForDate(agentId: string, date: string): Promise<boolean> {
-    const supabase = await createServerSupabaseClient();
+    const supabase = createAdminClient();
 
     // 1. Check agent is not inactive/on_leave
     const { data: agent } = await supabase

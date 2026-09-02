@@ -12,8 +12,8 @@ n8n handles post-event automation and external integrations — NOT core busines
 | Daily Logistics Summary | Cron at end of day | Summary report to logistics manager |
 | WhatsApp Notifications | Various events | Outbound messages via Twilio |
 
-## Self-hosted
-n8n runs separately — not deployed on Vercel.
+## V1 note
+Outbound WhatsApp notifications currently run in the main application (`notificationService`). These n8n workflows are documented for a later automation layer and are not wired up.
 
 ## Configuration
 - `N8N_WEBHOOK_BASE_URL` — base URL of self-hosted n8n instance

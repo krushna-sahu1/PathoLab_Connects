@@ -37,6 +37,36 @@ export const patientService = {
     return { patients: (data as Patient[]) ?? [], total: count ?? 0 };
   },
 
+  async getPatientByPhone(phone: string) {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from('patients')
+      .select('*, patient_addresses(*)')
+      .eq('phone', phone)
+      .maybeSingle();
+    return data as (Patient & { patient_addresses: PatientAddress[] }) | null;
+  },
+
+  async findOrCreateByPhone(phone: string) {
+    const existing = await patientService.getPatientByPhone(phone);
+    if (existing) return existing;
+
+    const admin = createAdminClient();
+    const patient_id = generatePatientId();
+    const { data, error } = await admin
+      .from('patients')
+      .insert({
+        patient_id,
+        full_name: 'WhatsApp Patient',
+        phone,
+        status: 'active',
+      })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return { ...(data as Patient), patient_addresses: [] as PatientAddress[] };
+  },
+
   async getPatientById(id: string) {
     const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase
@@ -73,7 +103,7 @@ export const patientService = {
   },
 
   async getAddresses(patientId: string) {
-    const supabase = await createServerSupabaseClient();
+    const supabase = createAdminClient();
     const { data, error } = await supabase
       .from('patient_addresses')
       .select('*')

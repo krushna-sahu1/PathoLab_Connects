@@ -4,18 +4,23 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { sampleService } from '@/services/sample.service';
 import { updateSampleStatusSchema, createReportSchema } from '@/lib/validation/sample';
-import { requireAuth, requireRole } from '@/lib/auth/session';
+import { requireRole } from '@/lib/auth/session';
 import { writeAuditLog } from '@/lib/auth/audit';
+import { firstZodMessage } from '@/lib/utils/zod';
 import type { SampleStatus } from '@/services/sample.service';
 
-export async function updateSampleStatusAction(sampleId: string, formData: FormData) {
-  const user = await requireRole(['super_admin', 'operations_admin', 'lab_technician']);
+export async function updateSampleStatusAction(
+  sampleId: string,
+  _prev: unknown,
+  formData: FormData
+) {
+  const user = await requireRole(['super_admin', 'operations_admin']);
 
   const parsed = updateSampleStatusSchema.safeParse({
     status: formData.get('status'),
     remark: formData.get('remark') || undefined,
   });
-  if (!parsed.success) return { error: parsed.error.errors[0].message };
+  if (!parsed.success) return { error: firstZodMessage(parsed.error) };
 
   try {
     await sampleService.updateStatus(
@@ -39,17 +44,16 @@ export async function updateSampleStatusAction(sampleId: string, formData: FormD
   }
 }
 
-export async function createReportAction(formData: FormData) {
-  const user = await requireRole(['super_admin', 'operations_admin', 'lab_technician']);
+export async function createReportAction(_prev: unknown, formData: FormData) {
+  const user = await requireRole(['super_admin', 'operations_admin']);
 
   const parsed = createReportSchema.safeParse({
     sample_id: formData.get('sample_id'),
-    report_url: formData.get('report_url') || undefined,
+    file_path: formData.get('file_path') || formData.get('report_url') || undefined,
     report_date: formData.get('report_date'),
     lab_remarks: formData.get('lab_remarks') || undefined,
-    is_delivered: formData.get('is_delivered') === 'true',
   });
-  if (!parsed.success) return { error: parsed.error.errors[0].message };
+  if (!parsed.success) return { error: firstZodMessage(parsed.error) };
 
   try {
     const report = await sampleService.createReport(parsed.data, user.id);
@@ -69,7 +73,7 @@ export async function createReportAction(formData: FormData) {
 }
 
 export async function markReportDeliveredAction(reportId: string, sampleId: string) {
-  const user = await requireRole(['super_admin', 'operations_admin', 'lab_technician']);
+  const user = await requireRole(['super_admin', 'operations_admin']);
   try {
     await sampleService.markReportDelivered(reportId);
     await writeAuditLog({
@@ -77,7 +81,7 @@ export async function markReportDeliveredAction(reportId: string, sampleId: stri
       action: 'MARK_DELIVERED',
       resource_type: 'report',
       resource_id: reportId,
-      new_values: { is_delivered: true },
+      new_values: { status: 'delivered' },
     });
     revalidatePath(`/reports/${reportId}`);
     revalidatePath(`/samples/${sampleId}`);

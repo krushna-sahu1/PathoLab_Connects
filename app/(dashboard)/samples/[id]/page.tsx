@@ -7,6 +7,7 @@ import { SampleStatusBadge } from '@/components/samples/sample-status-badge';
 import { SampleStatusUpdateForm } from '@/components/samples/sample-status-update-form';
 import { ReportForm } from '@/components/samples/report-form';
 import { StatusTimeline } from '@/components/collections/status-timeline';
+import { unwrapReport } from '@/services/sample.service';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -25,7 +26,7 @@ export default async function SampleDetailPage({ params }: PageProps) {
   }
 
   const history = sample.sample_status_history ?? [];
-  const report = sample.reports ?? null;
+  const report = unwrapReport(sample.reports);
   const collection = sample.collections;
   const patient = collection?.patients;
   const isComplete = sample.status === 'report_ready';
@@ -105,12 +106,12 @@ export default async function SampleDetailPage({ params }: PageProps) {
                   <dt className="text-green-700">Report Date</dt>
                   <dd className="font-medium text-green-900">{report.report_date}</dd>
                 </div>
-                {report.report_url && (
+                {report.file_path && (
                   <div>
                     <dt className="text-green-700">Download</dt>
                     <dd>
                       <a
-                        href={report.report_url}
+                        href={report.file_path}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline font-medium"
@@ -128,10 +129,10 @@ export default async function SampleDetailPage({ params }: PageProps) {
                 )}
                 <div>
                   <dt className="text-green-700">Delivered</dt>
-                  <dd className="font-medium">{report.is_delivered ? 'Yes' : 'Not yet'}</dd>
+                  <dd className="font-medium capitalize">{report.status}</dd>
                 </div>
               </dl>
-              {canWrite && !report.is_delivered && (
+              {canWrite && report.status !== 'delivered' && (
                 <Link
                   href={`/reports/${report.id}`}
                   className="block text-center rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"

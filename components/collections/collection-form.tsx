@@ -5,16 +5,7 @@ import { useActionState } from 'react';
 import { createCollectionAction } from '@/app/actions/collection.actions';
 import type { Patient } from '@/types/patient';
 
-const TIME_SLOTS = [
-  '06:00 - 08:00',
-  '07:00 - 09:00',
-  '08:00 - 10:00',
-  '09:00 - 11:00',
-  '10:00 - 12:00',
-  '11:00 - 13:00',
-  '14:00 - 16:00',
-  '16:00 - 18:00',
-];
+import { COLLECTION_TIME_SLOTS } from '@/lib/constants';
 
 interface CollectionFormProps {
   patients: Patient[];
@@ -88,7 +79,7 @@ export function CollectionForm({ patients }: CollectionFormProps) {
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select slot…</option>
-            {TIME_SLOTS.map((s) => (
+            {COLLECTION_TIME_SLOTS.map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}
           </select>

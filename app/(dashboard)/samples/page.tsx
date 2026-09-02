@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { requireAuth } from '@/lib/auth/session';
 import { sampleService } from '@/services/sample.service';
 import { SampleStatusBadge } from '@/components/samples/sample-status-badge';
+import { unwrapReport } from '@/services/sample.service';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'All statuses' },
@@ -74,7 +75,9 @@ export default async function SamplesPage({ searchParams }: PageProps) {
                 <td colSpan={7} className="px-4 py-12 text-center text-gray-400">No samples found</td>
               </tr>
             ) : (
-              samples.map((sample) => (
+              samples.map((sample) => {
+                const report = unwrapReport(sample.reports);
+                return (
                 <tr key={sample.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 font-mono text-xs text-gray-500">{sample.sample_id}</td>
                   <td className="px-4 py-3">
@@ -85,9 +88,9 @@ export default async function SamplesPage({ searchParams }: PageProps) {
                   <td className="px-4 py-3 text-gray-600">{sample.collections?.agents?.name ?? '—'}</td>
                   <td className="px-4 py-3"><SampleStatusBadge status={sample.status} /></td>
                   <td className="px-4 py-3">
-                    {sample.reports ? (
-                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700">
-                        {sample.reports.is_delivered ? 'Delivered' : 'Ready'}
+                    {report ? (
+                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 capitalize">
+                        {report.status}
                       </span>
                     ) : (
                       <span className="text-gray-300 text-xs">No report</span>
@@ -99,7 +102,8 @@ export default async function SamplesPage({ searchParams }: PageProps) {
                     </Link>
                   </td>
                 </tr>
-              ))
+              );
+              })
             )}
           </tbody>
         </table>
