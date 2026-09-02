@@ -33,7 +33,7 @@ CREATE POLICY "reports: staff can read"
 
 CREATE POLICY "tickets: staff can read"
   ON public.tickets FOR SELECT
-  USING (auth.uid() IS NOT NULL);
+  USING (public.get_user_role() IN ('super_admin', 'operations_admin', 'support_agent'));
 
 CREATE POLICY "ticket_messages: staff can read"
   ON public.ticket_messages FOR SELECT
