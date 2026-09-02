@@ -9,7 +9,7 @@
 | 4 | Agents + availability | ✅ Complete |
 | 5 | Collections + assignment engine | ✅ Complete |
 | 6 | Agent mobile interface | ✅ Complete |
-| 7 | Samples + reports | ⏳ Pending |
+| 7 | Samples + reports | ✅ Complete |
 | 8 | Tickets | ⏳ Pending |
 | 9 | Twilio WhatsApp | ⏳ Pending |
 | 10 | n8n automations and notifications | ⏳ Pending |

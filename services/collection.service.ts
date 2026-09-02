@@ -283,6 +283,17 @@ export const collectionService = {
       remark: remark ?? null,
     });
 
+    // Auto-create sample when collection is marked as collected
+    if (newStatus === 'collected') {
+      try {
+        const { sampleService } = await import('@/services/sample.service');
+        await sampleService.createFromCollection(collectionId, changedBy);
+      } catch (sampleErr) {
+        // Non-fatal: log but don't block
+        console.error('Failed to auto-create sample:', sampleErr);
+      }
+    }
+
     return data as Collection;
   },
 
