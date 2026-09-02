@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getWhatsAppProvider } from '@/lib/twilio/provider';
 import { WHATSAPP_TEMPLATES } from '@/lib/twilio/templates';
 import { COLLECTION_TIME_SLOTS, TICKET_CATEGORIES } from '@/lib/constants';
+import { isResetCommand, parseMainMenu, parseOneBasedIndex, resolveBookingDate } from '@/lib/whatsapp/menu';
 import { normalizePhone } from '@/lib/utils/phone';
 import { patientService } from '@/services/patient.service';
 import { collectionService } from '@/services/collection.service';
@@ -169,10 +170,7 @@ async function routeMessage(
   patient: Patient & { patient_addresses?: PatientAddress[] },
   text: string
 ): Promise<string> {
-  const lower = text.toLowerCase();
-  const isMenuReset = lower === '0' || lower === 'menu' || lower === 'hi' || lower === 'hello';
-
-  if (isMenuReset) {
+  if (isResetCommand(text)) {
     await setState(conversation.id, 'main', {});
     return menuText(patient.full_name);
   }
@@ -192,22 +190,22 @@ async function handleMainMenu(
   patient: Patient & { patient_addresses?: PatientAddress[] },
   text: string
 ): Promise<string> {
-  switch (text.trim()) {
-    case '1':
+  switch (parseMainMenu(text)) {
+    case 'book':
       return startBooking(conversation, patient);
-    case '2':
+    case 'track_collection':
       return trackCollection(patient.id);
-    case '3':
+    case 'track_sample':
       return trackSample(patient.id);
-    case '4':
+    case 'get_report':
       return getReport(patient.id);
-    case '5':
+    case 'raise_query':
       await setState(conversation.id, 'query_category', {});
       return [
         'What is your query about? Reply with a number:',
         ...TICKET_CATEGORIES.map((c, i) => `${i + 1}. ${c.label}`),
       ].join('\n');
-    case '6':
+    case 'talk_to_support':
       return talkToSupport(patient);
     default:
       return `${WHATSAPP_TEMPLATES.WELCOME(patient.full_name)}\n\n${WHATSAPP_TEMPLATES.MAIN_MENU()}`;
@@ -266,8 +264,8 @@ async function handleBookingAddress(
     return datePrompt();
   }
 
-  const index = parseInt(text, 10) - 1;
-  const chosen = addresses[index];
+  const index = parseOneBasedIndex(text, addresses.length);
+  const chosen = index === null ? undefined : addresses[index];
   if (!chosen) {
     return 'Please reply with the number of an address from the list.';
   }
@@ -286,9 +284,9 @@ async function handleBookingDate(
   text: string
 ) {
   const context = { ...(conversation.context ?? {}) };
-  if (text === '1') context.date = todayISODate();
-  else if (text === '2') context.date = tomorrowISODate();
-  else return 'Reply 1 for today or 2 for tomorrow.';
+  const date = resolveBookingDate(text, todayISODate(), tomorrowISODate());
+  if (!date) return 'Reply 1 for today or 2 for tomorrow.';
+  context.date = date;
 
   await setState(conversation.id, 'booking_slot', context);
   const slots = COLLECTION_TIME_SLOTS.map((s, i) => `${i + 1}. ${s}`).join('\n');
@@ -301,8 +299,8 @@ async function handleBookingSlot(
   text: string
 ) {
   const context = { ...(conversation.context ?? {}) };
-  const index = parseInt(text, 10) - 1;
-  const slot = COLLECTION_TIME_SLOTS[index];
+  const index = parseOneBasedIndex(text, COLLECTION_TIME_SLOTS.length);
+  const slot = index === null ? undefined : COLLECTION_TIME_SLOTS[index];
   if (!slot) return 'Please reply with a valid slot number.';
 
   const addressId = String(context.address_id ?? '');
@@ -380,8 +378,8 @@ async function handleQueryCategory(
   _patient: Patient,
   text: string
 ) {
-  const index = parseInt(text, 10) - 1;
-  const category = TICKET_CATEGORIES[index];
+  const index = parseOneBasedIndex(text, TICKET_CATEGORIES.length);
+  const category = index === null ? undefined : TICKET_CATEGORIES[index];
   if (!category) return 'Please reply with a category number from 1 to 5.';
   await setState(conversation.id, 'query_description', { category: category.value });
   return 'Please describe your query in a short message.';

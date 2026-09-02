@@ -17,15 +17,17 @@ export default async function WhatsAppPage() {
       <div>
         <h2 className="text-2xl font-bold text-gray-900">WhatsApp</h2>
         <p className="mt-1 text-sm text-gray-500">
-          Patient chatbot (mock provider). Outbound notifications are sent from the app, not n8n.
+          Patient WhatsApp threads. Outbound notifications are sent by the app via Twilio.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <WhatsAppSimulator />
-        </div>
-        <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 overflow-hidden">
+        {process.env.NODE_ENV !== 'production' && (
+          <div className="lg:col-span-1">
+            <WhatsAppSimulator />
+          </div>
+        )}
+        <div className={`${process.env.NODE_ENV !== 'production' ? 'lg:col-span-2' : 'lg:col-span-3'} bg-white rounded-lg border border-gray-200 overflow-hidden`}>
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>

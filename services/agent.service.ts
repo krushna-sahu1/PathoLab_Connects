@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { isAgentEligibleForAssignment } from '@/lib/logistics/assignment';
 import type { Agent, AgentAvailability } from '@/types/agent';
 import type { CreateAgentInput } from '@/lib/validation/agent';
 
@@ -129,22 +130,20 @@ export const agentService = {
       .single();
 
     if (!agent) return false;
-    if (['inactive', 'on_leave', 'offline'].includes(agent.status)) return false;
 
-    // 2. Check availability record (if set to unavailable)
     const { data: avail } = await supabase
       .from('agent_availability')
       .select('is_available, current_load')
       .eq('agent_id', agentId)
       .eq('date', date)
-      .single();
+      .maybeSingle();
 
-    if (avail && !avail.is_available) return false;
-
-    // 3. Check daily capacity not exceeded
-    const currentLoad = avail?.current_load ?? 0;
-    if (currentLoad >= agent.daily_capacity) return false;
-
-    return true;
+    return isAgentEligibleForAssignment({
+      status: agent.status,
+      dailyCapacity: agent.daily_capacity,
+      availability: avail
+        ? { isAvailable: avail.is_available, currentLoad: avail.current_load }
+        : null,
+    });
   },
 };

@@ -4,7 +4,8 @@ import { requireAuth } from '@/lib/auth/session';
 import { hasPermission } from '@/lib/auth/permissions';
 import { zoneService } from '@/services/zone.service';
 import { ZoneRuleList } from '@/components/zones/zone-rule-list';
-import { ZoneRuleForm } from '@/components/zones/zone-rule-form';
+import { agentService } from '@/services/agent.service';
+import { ZoneAgentAssignForm } from '@/components/zones/zone-agent-assign-form';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -23,6 +24,7 @@ export default async function ZoneDetailPage({ params }: PageProps) {
   }
 
   const rules = zone.zone_rules ?? [];
+  const agents = canWrite ? await agentService.getAgents({ includeInactive: true }) : [];
   const pincodeRules = rules.filter((r) => r.rule_type === 'pincode');
   const sectorRules = rules.filter((r) => r.rule_type === 'sector');
   const areaRules = rules.filter((r) => r.rule_type === 'area');
@@ -78,10 +80,20 @@ export default async function ZoneDetailPage({ params }: PageProps) {
             </dl>
           </div>
 
-          {/* Agent assignment — Phase 4 */}
-          <div className="bg-white rounded-lg border border-dashed border-gray-200 p-5">
-            <h3 className="font-semibold text-gray-900 mb-1">Agent Assignment</h3>
-            <p className="text-sm text-gray-400">Primary and backup agents will be assignable in Phase 4.</p>
+          <div className="bg-white rounded-lg border border-gray-200 p-5">
+            <h3 className="font-semibold text-gray-900 mb-3">Agent Assignment</h3>
+            {canWrite ? (
+              <ZoneAgentAssignForm
+                zoneId={id}
+                agents={agents}
+                primaryAgentId={zone.primary_agent_id}
+                backupAgentId={zone.backup_agent_id}
+              />
+            ) : (
+              <p className="text-sm text-gray-600">
+                Primary and backup agents are used by auto-assignment.
+              </p>
+            )}
           </div>
         </div>
 

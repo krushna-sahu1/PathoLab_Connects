@@ -4,7 +4,11 @@ import { AgentBottomNav } from '@/components/agent/agent-bottom-nav';
 export const metadata: Metadata = {
   title: 'Hypatho — Agent App',
   description: 'Field agent mobile interface',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
+  appleWebApp: {
+    capable: true,
+    title: 'Hypatho Agent',
+    statusBarStyle: 'default',
+  },
 };
 
 export default function AgentLayout({ children }: { children: React.ReactNode }) {

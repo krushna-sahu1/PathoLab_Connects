@@ -11,5 +11,6 @@
 | 6 | Agent mobile interface | ✅ Complete |
 | 7 | Samples + reports | ✅ Complete |
 | 8 | Tickets | ✅ Complete |
-| 9 | Twilio WhatsApp (mock provider + chatbot + outbound notifications in-app) | ✅ Complete |
-| 10 | n8n automations | ⏳ Deferred — notifications live in the main app for V1 |
+| 9 | Twilio WhatsApp (live provider + signature verification; mock only for tests/dev) | 🔄 In progress |
+| 10 | n8n automations | ⏳ Deferred |
+| 11 | Agent web push | ⏳ Waiting on product/credentials |

@@ -20,7 +20,7 @@ export async function getSessionUser(): Promise<User | null> {
     .eq('id', user.id)
     .single();
 
-  if (!profile) return null;
+  if (!profile || !profile.is_active) return null;
 
   return {
     id: profile.id,

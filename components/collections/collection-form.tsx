@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useActionState } from 'react';
 import { createCollectionAction } from '@/app/actions/collection.actions';
-import type { Patient } from '@/types/patient';
-
+import type { Patient, PatientAddress } from '@/types/patient';
 import { COLLECTION_TIME_SLOTS } from '@/lib/constants';
 
 interface CollectionFormProps {
@@ -12,10 +11,25 @@ interface CollectionFormProps {
 }
 
 export function CollectionForm({ patients }: CollectionFormProps) {
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState('');
+  const [addresses, setAddresses] = useState<PatientAddress[]>([]);
+  const [loadingAddresses, setLoadingAddresses] = useState(false);
   const [state, formAction, isPending] = useActionState(createCollectionAction, null);
 
   const today = new Date().toISOString().slice(0, 10);
+
+  useEffect(() => {
+    if (!selectedPatientId) {
+      setAddresses([]);
+      return;
+    }
+    setLoadingAddresses(true);
+    fetch(`/api/patients/${selectedPatientId}`)
+      .then((r) => r.json())
+      .then((data) => setAddresses(data.patient_addresses ?? []))
+      .catch(() => setAddresses([]))
+      .finally(() => setLoadingAddresses(false));
+  }, [selectedPatientId]);
 
   return (
     <form action={formAction} className="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
@@ -23,20 +37,13 @@ export function CollectionForm({ patients }: CollectionFormProps) {
         <div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700">{state.error}</div>
       )}
 
-      <div className="rounded-md bg-blue-50 border border-blue-200 p-3 text-sm text-blue-700">
-        💡 After creating, the assignment engine will automatically find the best available agent based on zone rules.
-      </div>
-
-      {/* Patient selector */}
       <div className="space-y-1">
         <label className="block text-sm font-medium text-gray-700">Patient *</label>
         <select
           name="patient_id"
           required
-          onChange={(e) => {
-            const p = patients.find((p) => p.id === e.target.value) ?? null;
-            setSelectedPatient(p);
-          }}
+          value={selectedPatientId}
+          onChange={(e) => setSelectedPatientId(e.target.value)}
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Select patient…</option>
@@ -46,17 +53,24 @@ export function CollectionForm({ patients }: CollectionFormProps) {
         </select>
       </div>
 
-      {/* Address selector — requires patient fetch from API */}
       <div className="space-y-1">
         <label className="block text-sm font-medium text-gray-700">Collection Address *</label>
-        <input
+        <select
           name="address_id"
-          type="text"
           required
-          placeholder="Enter address UUID (will be a dropdown in a future iteration)"
+          disabled={!selectedPatientId || loadingAddresses}
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <p className="text-xs text-gray-400">Go to the patient's profile to get their address ID, or use the Patient 360 view to book directly.</p>
+        >
+          <option value="">{loadingAddresses ? 'Loading addresses…' : 'Select address…'}</option>
+          {addresses.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.label} — {a.full_address} ({a.pincode})
+            </option>
+          ))}
+        </select>
+        {selectedPatientId && !loadingAddresses && addresses.length === 0 && (
+          <p className="text-xs text-amber-600">This patient has no address yet. Add one on the patient profile.</p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -70,7 +84,6 @@ export function CollectionForm({ patients }: CollectionFormProps) {
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-
         <div className="space-y-1">
           <label className="block text-sm font-medium text-gray-700">Time Slot *</label>
           <select
@@ -84,7 +97,6 @@ export function CollectionForm({ patients }: CollectionFormProps) {
             ))}
           </select>
         </div>
-
         <div className="space-y-1">
           <label className="block text-sm font-medium text-gray-700">Priority</label>
           <select
@@ -93,16 +105,14 @@ export function CollectionForm({ patients }: CollectionFormProps) {
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="normal">Normal</option>
-            <option value="urgent">🔴 Urgent</option>
+            <option value="urgent">Urgent</option>
           </select>
         </div>
-
         <div className="space-y-1">
           <label className="block text-sm font-medium text-gray-700">Notes</label>
           <input
             name="notes"
             type="text"
-            placeholder="Optional notes for agent"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -112,7 +122,7 @@ export function CollectionForm({ patients }: CollectionFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-md bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="rounded-md bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {isPending ? 'Creating & Assigning…' : 'Create Collection'}
         </button>

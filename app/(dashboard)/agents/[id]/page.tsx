@@ -6,6 +6,8 @@ import { agentService } from '@/services/agent.service';
 import { AgentStatusBadge } from '@/components/agents/agent-status-badge';
 import { AgentStatusForm } from '@/components/agents/agent-status-form';
 import { AvailabilityPanel } from '@/components/agents/availability-panel';
+import { collectionService } from '@/services/collection.service';
+import { CollectionStatusBadge } from '@/components/collections/collection-status-badge';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -28,6 +30,7 @@ export default async function AgentDetailPage({ params }: PageProps) {
   const fromDate = today.toISOString().slice(0, 10);
   const toDate = new Date(today.getTime() + 6 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const availability = await agentService.getAvailabilityRange(id, fromDate, toDate);
+  const todayJobs = await collectionService.getCollectionsByAgent(id, fromDate);
 
   return (
     <div className="space-y-6">
@@ -109,10 +112,22 @@ export default async function AgentDetailPage({ params }: PageProps) {
             canWrite={canWrite}
           />
 
-          {/* Today's assignments — Phase 5 */}
           <div className="bg-white rounded-lg border border-gray-200 p-5">
-            <h3 className="font-semibold text-gray-900 mb-2">Today's Assignments</h3>
-            <p className="text-sm text-gray-400">Available after Phase 5 (Collections)</p>
+            <h3 className="font-semibold text-gray-900 mb-3">Today's Assignments</h3>
+            {todayJobs.length === 0 ? (
+              <p className="text-sm text-gray-400">No jobs for today</p>
+            ) : (
+              <ul className="space-y-2 text-sm">
+                {todayJobs.map((job) => (
+                  <li key={job.id} className="flex items-center justify-between">
+                    <Link href={`/collections/${job.id}`} className="font-mono text-xs text-blue-600 hover:underline">
+                      {job.collection_id}
+                    </Link>
+                    <CollectionStatusBadge status={job.status} />
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </div>

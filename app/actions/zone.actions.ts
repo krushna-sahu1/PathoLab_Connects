@@ -110,3 +110,35 @@ export async function deleteZoneRuleAction(ruleId: string, zoneId: string) {
     return { error: err instanceof Error ? err.message : 'Failed to delete rule' };
   }
 }
+
+export async function assignZoneAgentsAction(zoneId: string, _prev: unknown, formData: FormData) {
+  const user = await requireRole(['super_admin', 'operations_admin', 'logistics_manager']);
+  const primary = (formData.get('primary_agent_id') as string) || null;
+  const backup = (formData.get('backup_agent_id') as string) || null;
+
+  try {
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from('zones')
+      .update({
+        primary_agent_id: primary,
+        backup_agent_id: backup,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', zoneId);
+    if (error) throw new Error(error.message);
+
+    await writeAuditLog({
+      user_id: user.id,
+      action: 'ASSIGN_AGENTS',
+      resource_type: 'zone',
+      resource_id: zoneId,
+      new_values: { primary_agent_id: primary, backup_agent_id: backup },
+    });
+    revalidatePath(`/zones/${zoneId}`);
+    return { success: true };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Failed to assign agents' };
+  }
+}

@@ -2,7 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { zoneService } from '@/services/zone.service';
 import { agentService } from '@/services/agent.service';
-import { generateCollectionId } from '@/lib/utils/ids';
+import { assignmentCandidateIds } from '@/lib/logistics/assignment';
 import type { Collection, CollectionStatus, CollectionStatusHistory } from '@/types/collection';
 import type { CreateCollectionInput } from '@/lib/validation/collection';
 
@@ -179,10 +179,7 @@ export const collectionService = {
 
     if (!zone) return { assigned: false, reason: 'Zone not found' };
 
-    const candidates = [
-      zone.primary_agent_id,
-      zone.backup_agent_id,
-    ].filter(Boolean) as string[];
+    const candidates = assignmentCandidateIds(zone.primary_agent_id, zone.backup_agent_id);
 
     for (const agentId of candidates) {
       const available = await agentService.isAgentAvailableForDate(agentId, date);

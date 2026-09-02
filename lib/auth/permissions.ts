@@ -13,8 +13,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     'reports:read', 'reports:write',
     'tickets:read', 'tickets:write',
     'whatsapp:read',
-    'users:read',
-    'settings:read',
+    'users:read', 'users:write',
+    'settings:read', 'settings:write',
   ],
   logistics_manager: [
     'dashboard:read',

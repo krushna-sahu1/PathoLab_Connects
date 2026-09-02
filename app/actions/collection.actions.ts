@@ -8,7 +8,7 @@ import { requireAuth, requireRole } from '@/lib/auth/session';
 import { writeAuditLog } from '@/lib/auth/audit';
 import type { CollectionStatus } from '@/types/collection';
 
-export async function createCollectionAction(formData: FormData) {
+export async function createCollectionAction(_prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin']);
 
   const raw = {
