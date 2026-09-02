@@ -8,6 +8,8 @@ import { SampleStatusUpdateForm } from '@/components/samples/sample-status-updat
 import { ReportForm } from '@/components/samples/report-form';
 import { StatusTimeline } from '@/components/collections/status-timeline';
 import { unwrapReport } from '@/services/sample.service';
+import { ReportDownloadLink } from '@/components/samples/report-download-link';
+import { isStorageObjectPath } from '@/lib/reports/storage';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -106,21 +108,19 @@ export default async function SampleDetailPage({ params }: PageProps) {
                   <dt className="text-green-700">Report Date</dt>
                   <dd className="font-medium text-green-900">{report.report_date}</dd>
                 </div>
-                {report.file_path && (
+                {isStorageObjectPath(report.file_path) ? (
                   <div>
                     <dt className="text-green-700">Download</dt>
                     <dd>
-                      <a
-                        href={report.file_path}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <ReportDownloadLink
+                        reportId={report.id}
                         className="text-blue-600 hover:underline font-medium"
                       >
-                        View Report ↗
-                      </a>
+                        View Report
+                      </ReportDownloadLink>
                     </dd>
                   </div>
-                )}
+                ) : null}
                 {report.lab_remarks && (
                   <div>
                     <dt className="text-green-700">Lab Remarks</dt>

@@ -225,12 +225,13 @@ export const collectionService = {
 
       const { data: details } = await admin
         .from('collections')
-        .select('date, time_slot, patients(phone), agents(name)')
+        .select('date, time_slot, patients(phone, full_name), agents(name)')
         .eq('id', collectionId)
         .single();
-      const patient = details?.patients as { phone?: string } | { phone?: string }[] | null;
+      const patient = details?.patients as { phone?: string; full_name?: string } | { phone?: string; full_name?: string }[] | null;
       const agent = details?.agents as { name?: string } | { name?: string }[] | null;
       const phone = (Array.isArray(patient) ? patient[0] : patient)?.phone;
+      const patientName = (Array.isArray(patient) ? patient[0] : patient)?.full_name ?? 'Patient';
       const agentName = (Array.isArray(agent) ? agent[0] : agent)?.name ?? 'our agent';
       if (phone) {
         void import('@/services/notification.service').then(({ notificationService }) =>
@@ -242,6 +243,14 @@ export const collectionService = {
           })
         );
       }
+      void import('@/lib/push/send').then(({ notifyAgentJob }) =>
+        notifyAgentJob({
+          agentId,
+          kind: 'assigned',
+          patientName,
+          timeSlot: details?.time_slot ?? '',
+        })
+      );
 
       return { assigned: true, agentId, reason: 'Auto-assigned' };
     }
@@ -261,7 +270,7 @@ export const collectionService = {
     // Get current status
     const { data: current } = await admin
       .from('collections')
-      .select('status, agent_id, date')
+      .select('status, agent_id, date, time_slot, patients(full_name)')
       .eq('id', collectionId)
       .single();
 
@@ -300,6 +309,19 @@ export const collectionService = {
       changed_by: changedBy,
       remark: remark ?? null,
     });
+
+    if (newStatus === 'cancelled' && current.agent_id) {
+      const assignedPatient = current.patients as { full_name?: string } | { full_name?: string }[] | null;
+      const patientName = (Array.isArray(assignedPatient) ? assignedPatient[0] : assignedPatient)?.full_name ?? 'Patient';
+      void import('@/lib/push/send').then(({ notifyAgentJob }) =>
+        notifyAgentJob({
+          agentId: current.agent_id as string,
+          kind: 'cancelled',
+          patientName,
+          timeSlot: (current.time_slot as string) ?? '',
+        })
+      );
+    }
 
     // Auto-create sample when collection is marked as collected
     if (newStatus === 'collected') {
@@ -387,6 +409,35 @@ export const collectionService = {
       changed_by: changedBy,
       remark: 'Manually assigned by operations',
     });
+
+    const { data: details } = await admin
+      .from('collections')
+      .select('date, time_slot, patients(phone, full_name), agents(name)')
+      .eq('id', collectionId)
+      .single();
+    const patient = details?.patients as { phone?: string; full_name?: string } | { phone?: string; full_name?: string }[] | null;
+    const agent = details?.agents as { name?: string } | { name?: string }[] | null;
+    const phone = (Array.isArray(patient) ? patient[0] : patient)?.phone;
+    const patientName = (Array.isArray(patient) ? patient[0] : patient)?.full_name ?? 'Patient';
+    const agentName = (Array.isArray(agent) ? agent[0] : agent)?.name ?? 'our agent';
+    if (phone) {
+      void import('@/services/notification.service').then(({ notificationService }) =>
+        notificationService.notifyCollectionAssigned({
+          phone,
+          agentName,
+          date: details?.date ?? col.date,
+          timeSlot: details?.time_slot ?? '',
+        })
+      );
+    }
+    void import('@/lib/push/send').then(({ notifyAgentJob }) =>
+      notifyAgentJob({
+        agentId,
+        kind: 'assigned',
+        patientName,
+        timeSlot: details?.time_slot ?? '',
+      })
+    );
 
     return data as Collection;
   },

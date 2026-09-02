@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { createClient } from '@supabase/supabase-js';
 
 /**
- * Contract for RLS: these policies must exist so dashboard reads work
- * while writes go through the service-role client.
- * Live SQL assertion is skipped unless SUPABASE_SERVICE_ROLE_KEY is present.
+ * These names must exist on the linked project (see supabase/migrations).
+ * Writes go through the service-role client; dashboard reads use authenticated SELECT policies.
  */
-const REQUIRED_SELECT_POLICIES = [
+export const REQUIRED_SELECT_POLICIES = [
   'patients: staff can read',
   'collections: staff can read',
   'samples: staff can read',
@@ -16,22 +16,39 @@ const REQUIRED_SELECT_POLICIES = [
   'user_roles: user can read own',
 ];
 
+function requireLiveCredentials() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const service = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (process.env.CI === 'true' && (!url || !service || !anon)) {
+    throw new Error(
+      'CI must set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY so RLS tests run'
+    );
+  }
+  return { url, service, anon, ready: Boolean(url && service && anon) };
+}
+
 describe('RLS policy contract', () => {
   it('documents required SELECT policies', () => {
     expect(REQUIRED_SELECT_POLICIES.length).toBeGreaterThan(5);
     expect(REQUIRED_SELECT_POLICIES).toContain('audit_logs: super_admin can read');
   });
 
-  it.skipIf(!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.NEXT_PUBLIC_SUPABASE_URL)(
-    'confirms required policies exist on the linked project',
+  it.skipIf(!requireLiveCredentials().ready)(
+    'confirms required policies exist and anonymous clients cannot read reports',
     async () => {
-      const { createClient } = await import('@supabase/supabase-js');
-      const admin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
-      const { data, error } = await admin.rpc('get_user_role');
-      expect(error || data !== undefined).toBeTruthy();
+      const { url, service, anon } = requireLiveCredentials();
+      const admin = createClient(url!, service!);
+      const { data, error } = await admin.rpc('list_policy_names');
+      expect(error).toBeNull();
+      const names = (data as { policy_name: string }[] | null)?.map((row) => row.policy_name) ?? [];
+      for (const required of REQUIRED_SELECT_POLICIES) {
+        expect(names).toContain(required);
+      }
+
+      const publicClient = createClient(url!, anon!);
+      const { data: leaked, error: anonError } = await publicClient.from('reports').select('id').limit(1);
+      expect(anonError || !leaked?.length).toBeTruthy();
     }
   );
 });
