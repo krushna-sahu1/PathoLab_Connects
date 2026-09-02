@@ -6,6 +6,7 @@ import { collectionService } from '@/services/collection.service';
 import { createCollectionSchema, updateCollectionStatusSchema, reassignCollectionSchema } from '@/lib/validation/collection';
 import { requireAuth, requireRole } from '@/lib/auth/session';
 import { writeAuditLog } from '@/lib/auth/audit';
+import { firstZodMessage } from '@/lib/utils/zod';
 import type { CollectionStatus } from '@/types/collection';
 
 export async function createCollectionAction(_prev: unknown, formData: FormData) {
@@ -21,7 +22,7 @@ export async function createCollectionAction(_prev: unknown, formData: FormData)
   };
 
   const parsed = createCollectionSchema.safeParse(raw);
-  if (!parsed.success) return { error: parsed.error.errors[0].message };
+  if (!parsed.success) return { error: firstZodMessage(parsed.error) };
 
   try {
     const collection = await collectionService.createCollection(parsed.data, user.id);
@@ -50,7 +51,7 @@ export async function updateCollectionStatusAction(collectionId: string, formDat
   };
 
   const parsed = updateCollectionStatusSchema.safeParse(raw);
-  if (!parsed.success) return { error: parsed.error.errors[0].message };
+  if (!parsed.success) return { error: firstZodMessage(parsed.error) };
 
   const remark = parsed.data.failure_reason
     ? `Failure reason: ${parsed.data.failure_reason}. ${parsed.data.remark ?? ''}`
@@ -78,7 +79,7 @@ export async function manualAssignAction(collectionId: string, formData: FormDat
   const user = await requireRole(['super_admin', 'operations_admin', 'logistics_manager']);
 
   const parsed = reassignCollectionSchema.safeParse({ agent_id: formData.get('agent_id') });
-  if (!parsed.success) return { error: parsed.error.errors[0].message };
+  if (!parsed.success) return { error: firstZodMessage(parsed.error) };
 
   try {
     await collectionService.manualAssign(collectionId, parsed.data.agent_id, user.id);

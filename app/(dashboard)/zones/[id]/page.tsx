@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth/session';
 import { hasPermission } from '@/lib/auth/permissions';
 import { zoneService } from '@/services/zone.service';
 import { ZoneRuleList } from '@/components/zones/zone-rule-list';
+import { ZoneRuleForm } from '@/components/zones/zone-rule-form';
 import { agentService } from '@/services/agent.service';
 import { ZoneAgentAssignForm } from '@/components/zones/zone-agent-assign-form';
 
