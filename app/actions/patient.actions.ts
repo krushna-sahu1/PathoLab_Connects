@@ -8,7 +8,7 @@ import { requireAuth, requireRole } from '@/lib/auth/session';
 import { writeAuditLog } from '@/lib/auth/audit';
 import { firstZodMessage } from '@/lib/utils/zod';
 
-export async function createPatientAction(formData: FormData) {
+export async function createPatientAction(_prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin']);
 
   const raw = {
@@ -41,7 +41,7 @@ export async function createPatientAction(formData: FormData) {
   }
 }
 
-export async function updatePatientAction(id: string, formData: FormData) {
+export async function updatePatientAction(id: string, _prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin']);
 
   const raw = {
@@ -75,7 +75,7 @@ export async function updatePatientAction(id: string, formData: FormData) {
   }
 }
 
-export async function addAddressAction(patientId: string, formData: FormData) {
+export async function addAddressAction(patientId: string, _prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin']);
 
   const raw = {

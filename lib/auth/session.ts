@@ -1,5 +1,5 @@
+import { redirect } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
 import type { User } from '@/types/auth';
 import type { UserRole } from '@/types/auth';
 
@@ -40,7 +40,6 @@ export async function getSessionUser(): Promise<User | null> {
 export async function requireAuth(): Promise<User> {
   const user = await getSessionUser();
   if (!user) {
-    const { redirect } = await import('next/navigation');
     redirect('/login');
   }
   return user;
@@ -52,7 +51,6 @@ export async function requireAuth(): Promise<User> {
 export async function requireRole(allowedRoles: UserRole[]): Promise<User> {
   const user = await requireAuth();
   if (!allowedRoles.includes(user.role)) {
-    const { redirect } = await import('next/navigation');
     redirect('/dashboard?error=unauthorized');
   }
   return user;

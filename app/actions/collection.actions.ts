@@ -41,7 +41,7 @@ export async function createCollectionAction(_prev: unknown, formData: FormData)
   }
 }
 
-export async function updateCollectionStatusAction(collectionId: string, formData: FormData) {
+export async function updateCollectionStatusAction(collectionId: string, _prev: unknown, formData: FormData) {
   const user = await requireAuth();
 
   const raw = {
@@ -75,7 +75,7 @@ export async function updateCollectionStatusAction(collectionId: string, formDat
   }
 }
 
-export async function manualAssignAction(collectionId: string, formData: FormData) {
+export async function manualAssignAction(collectionId: string, _prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin', 'logistics_manager']);
 
   const parsed = reassignCollectionSchema.safeParse({ agent_id: formData.get('agent_id') });

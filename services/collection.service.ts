@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { zoneService } from '@/services/zone.service';
 import { agentService } from '@/services/agent.service';
 import { assignmentCandidateIds } from '@/lib/logistics/assignment';
+import { generateCollectionId } from '@/lib/utils/ids';
 import type { Collection, CollectionStatus, CollectionStatusHistory } from '@/types/collection';
 import type { CreateCollectionInput } from '@/lib/validation/collection';
 

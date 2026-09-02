@@ -2,6 +2,7 @@ import { requireAuth } from '@/lib/auth/session';
 import { getAgentForUser } from '@/lib/auth/agent-auth';
 import { collectionService } from '@/services/collection.service';
 import { JobCard } from '@/components/agent/job-card';
+import { JobDateFilter } from '@/components/agent/job-date-filter';
 import Link from 'next/link';
 
 interface PageProps {
@@ -28,16 +29,7 @@ export default async function AgentJobsPage({ searchParams }: PageProps) {
         <h2 className="text-lg font-bold text-gray-900">My Jobs</h2>
       </div>
 
-      {/* Date picker */}
-      <form method="GET">
-        <input
-          type="date"
-          name="date"
-          defaultValue={selectedDate}
-          className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onChange="this.form.submit()"
-        />
-      </form>
+      <JobDateFilter defaultValue={selectedDate} />
 
       {collections.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
