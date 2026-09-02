@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
 // Routes that don't need authentication
-const PUBLIC_ROUTES = ['/', '/login', '/auth/callback'];
+const PUBLIC_ROUTES = ['/', '/login', '/auth/callback', '/api/whatsapp'];
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });

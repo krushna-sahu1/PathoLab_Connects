@@ -3,9 +3,13 @@ import { requireAuth } from '@/lib/auth/session';
 import { hasPermission } from '@/lib/auth/permissions';
 import { patientService } from '@/services/patient.service';
 import { collectionService } from '@/services/collection.service';
+import { sampleService } from '@/services/sample.service';
+import { ticketService } from '@/services/ticket.service';
 import { AddressList } from '@/components/patients/address-list';
 import { AddressForm } from '@/components/patients/address-form';
 import { CollectionStatusBadge } from '@/components/collections/collection-status-badge';
+import { SampleStatusBadge } from '@/components/samples/sample-status-badge';
+import { TicketStatusBadge } from '@/components/tickets/ticket-status-badge';
 import Link from 'next/link';
 
 interface PageProps {
@@ -26,6 +30,9 @@ export default async function PatientDetailPage({ params }: PageProps) {
 
   const addresses = patient.patient_addresses ?? [];
   const collections = await collectionService.getCollectionsByPatient(id);
+  const samples = await sampleService.getSamplesByPatient(id);
+  const reports = await sampleService.getReportsByPatient(id);
+  const tickets = await ticketService.getTicketsByPatient(id);
 
   return (
     <div className="space-y-6">
@@ -105,12 +112,62 @@ export default async function PatientDetailPage({ params }: PageProps) {
           </div>
 
           <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-base font-semibold text-gray-900 mb-2">Reports</h3>
-            <p className="text-sm text-gray-400">Available in Phase 7</p>
+            <h3 className="text-base font-semibold text-gray-900 mb-4">Samples</h3>
+            {samples.length === 0 ? (
+              <p className="text-sm text-gray-400">No samples yet</p>
+            ) : (
+              <ul className="space-y-2 text-sm">
+                {samples.map((s) => (
+                  <li key={s.id} className="flex items-center justify-between">
+                    <Link href={`/samples/${s.id}`} className="font-mono text-xs text-blue-600 hover:underline">
+                      {s.sample_id}
+                    </Link>
+                    <SampleStatusBadge status={s.status} />
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
+
           <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-base font-semibold text-gray-900 mb-2">Support Tickets</h3>
-            <p className="text-sm text-gray-400">Available in Phase 8</p>
+            <h3 className="text-base font-semibold text-gray-900 mb-4">Reports</h3>
+            {reports.length === 0 ? (
+              <p className="text-sm text-gray-400">No reports yet</p>
+            ) : (
+              <ul className="space-y-2 text-sm">
+                {reports.map((r: { id: string; status: string; report_date?: string; samples?: { sample_id?: string } }) => (
+                  <li key={r.id} className="flex items-center justify-between">
+                    <Link href={`/reports/${r.id}`} className="text-blue-600 hover:underline">
+                      {r.samples?.sample_id ?? 'Report'} — {r.report_date ?? 'n/a'}
+                    </Link>
+                    <span className="text-xs capitalize text-gray-500">{r.status}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-semibold text-gray-900">Support Tickets</h3>
+              {hasPermission(user.role, 'tickets:write') && (
+                <Link href={`/tickets/new?patient_id=${id}`} className="text-sm text-blue-600 hover:underline">+ New Ticket</Link>
+              )}
+            </div>
+            {tickets.length === 0 ? (
+              <p className="text-sm text-gray-400">No tickets yet</p>
+            ) : (
+              <ul className="space-y-2 text-sm">
+                {tickets.map((t) => (
+                  <li key={t.id} className="flex items-center justify-between">
+                    <Link href={`/tickets/${t.id}`} className="font-mono text-xs text-blue-600 hover:underline">
+                      {t.ticket_id}
+                    </Link>
+                    <TicketStatusBadge status={t.status} />
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </div>

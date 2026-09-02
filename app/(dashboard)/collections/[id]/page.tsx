@@ -9,6 +9,7 @@ import { PriorityBadge } from '@/components/collections/priority-badge';
 import { StatusTimeline } from '@/components/collections/status-timeline';
 import { StatusUpdateForm } from '@/components/collections/status-update-form';
 import { ManualAssignForm } from '@/components/collections/manual-assign-form';
+import { sampleService } from '@/services/sample.service';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -28,6 +29,7 @@ export default async function CollectionDetailPage({ params }: PageProps) {
 
   const agents = canWrite ? await agentService.getAgents() : [];
   const history = collection.collection_status_history ?? [];
+  const sample = await sampleService.getSampleByCollectionId(id);
 
   const isActive = !['collected', 'failed', 'cancelled'].includes(collection.status);
 
@@ -98,6 +100,16 @@ export default async function CollectionDetailPage({ params }: PageProps) {
                 <div>
                   <dt className="text-gray-500">Notes</dt>
                   <dd className="text-gray-800">{collection.notes}</dd>
+                </div>
+              )}
+              {sample && (
+                <div>
+                  <dt className="text-gray-500">Sample</dt>
+                  <dd>
+                    <Link href={`/samples/${sample.id}`} className="text-blue-600 hover:underline font-mono text-xs">
+                      {sample.sample_id}
+                    </Link>
+                  </dd>
                 </div>
               )}
             </dl>

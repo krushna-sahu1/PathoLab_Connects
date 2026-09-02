@@ -28,7 +28,7 @@ export function ReportForm({ sampleId }: { sampleId: string }) {
       <div className="space-y-1">
         <label className="block text-sm font-medium text-gray-700">Report URL</label>
         <input
-          name="report_url"
+          name="file_path"
           type="url"
           placeholder="https://storage.example.com/report.pdf"
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"

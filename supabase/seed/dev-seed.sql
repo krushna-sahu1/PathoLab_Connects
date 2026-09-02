@@ -51,3 +51,21 @@ INSERT INTO public.patients (patient_id, full_name, phone, email, gender, status
   ('PAT-DEV-003', 'Sanjay Kumar (Dev)', '9100000003', 'sanjay.kumar@dev.test', 'male', 'active'),
   ('PAT-DEV-004', 'Priya Mishra (Dev)', '9100000004', 'priya.mishra@dev.test', 'female', 'active'),
   ('PAT-DEV-005', 'Arjun Patel (Dev)', '9100000005', 'arjun.patel@dev.test', 'male', 'active');
+
+-- Patient addresses (dev)
+INSERT INTO public.patient_addresses (patient_id, label, full_address, area, sector, pincode, is_primary)
+SELECT id, 'home', '12 Green Park, Sector 1', 'Green Park', 'Sector 1', '110001', true FROM public.patients WHERE patient_id = 'PAT-DEV-001'
+UNION ALL
+SELECT id, 'home', '44 Lake View, Sector 2', 'Lake View', 'Sector 2', '110002', true FROM public.patients WHERE patient_id = 'PAT-DEV-002'
+UNION ALL
+SELECT id, 'home', '8 MG Road, Sector 3', 'MG Road', 'Sector 3', '110003', true FROM public.patients WHERE patient_id = 'PAT-DEV-003'
+UNION ALL
+SELECT id, 'home', '21 Rose Avenue, Sector 4', 'Rose Avenue', 'Sector 4', '110004', true FROM public.patients WHERE patient_id = 'PAT-DEV-004'
+UNION ALL
+SELECT id, 'office', 'Hypatho Hub, Sector 1', 'Hub', 'Sector 1', '110001', true FROM public.patients WHERE patient_id = 'PAT-DEV-005';
+
+-- Support tickets (dev)
+INSERT INTO public.tickets (ticket_id, patient_id, category, description, priority, status)
+SELECT 'TKT-DEV-001', id, 'report', 'Dev ticket: patient asking when the report will be ready.', 'normal', 'open'
+FROM public.patients WHERE patient_id = 'PAT-DEV-001';
+

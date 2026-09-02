@@ -90,7 +90,7 @@ export const zoneService = {
     sector?: string;
     area?: string;
   }): Promise<Zone | null> {
-    const supabase = await createServerSupabaseClient();
+    const supabase = createAdminClient();
 
     // Build ordered list of (rule_type, rule_value) to try
     const checks: Array<{ rule_type: string; rule_value: string }> = [];

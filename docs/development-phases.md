@@ -10,6 +10,6 @@
 | 5 | Collections + assignment engine | ✅ Complete |
 | 6 | Agent mobile interface | ✅ Complete |
 | 7 | Samples + reports | ✅ Complete |
-| 8 | Tickets | ⏳ Pending |
-| 9 | Twilio WhatsApp | ⏳ Pending |
-| 10 | n8n automations and notifications | ⏳ Pending |
+| 8 | Tickets | ✅ Complete |
+| 9 | Twilio WhatsApp (mock provider + chatbot + outbound notifications in-app) | ✅ Complete |
+| 10 | n8n automations | ⏳ Deferred — notifications live in the main app for V1 |

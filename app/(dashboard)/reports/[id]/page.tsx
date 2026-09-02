@@ -36,7 +36,7 @@ export default async function ReportDetailPage({ params }: PageProps) {
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-gray-900">Report Information</h3>
-          {report.is_delivered ? (
+          {report.status === 'delivered' ? (
             <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-green-100 text-green-700">
               ✅ Delivered
             </span>
@@ -88,9 +88,9 @@ export default async function ReportDetailPage({ params }: PageProps) {
           )}
         </dl>
 
-        {report.report_url && (
+        {report.file_path && (
           <a
-            href={report.report_url}
+            href={report.file_path}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
@@ -99,7 +99,7 @@ export default async function ReportDetailPage({ params }: PageProps) {
           </a>
         )}
 
-        {canWrite && !report.is_delivered && (
+        {canWrite && report.status !== 'delivered' && (
           <MarkDeliveredButton reportId={id} sampleId={sample?.id ?? ''} />
         )}
       </div>

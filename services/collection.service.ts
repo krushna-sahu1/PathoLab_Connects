@@ -59,7 +59,7 @@ export const collectionService = {
   },
 
   async getCollectionsByPatient(patientId: string) {
-    const supabase = await createServerSupabaseClient();
+    const supabase = createAdminClient();
     const { data, error } = await supabase
       .from('collections')
       .select('*, zones(id, name), agents(id, name)')
@@ -225,6 +225,26 @@ export const collectionService = {
         remark: `Auto-assigned to agent ${agentId}`,
       });
 
+      const { data: details } = await admin
+        .from('collections')
+        .select('date, time_slot, patients(phone), agents(name)')
+        .eq('id', collectionId)
+        .single();
+      const patient = details?.patients as { phone?: string } | { phone?: string }[] | null;
+      const agent = details?.agents as { name?: string } | { name?: string }[] | null;
+      const phone = (Array.isArray(patient) ? patient[0] : patient)?.phone;
+      const agentName = (Array.isArray(agent) ? agent[0] : agent)?.name ?? 'our agent';
+      if (phone) {
+        void import('@/services/notification.service').then(({ notificationService }) =>
+          notificationService.notifyCollectionAssigned({
+            phone,
+            agentName,
+            date: details?.date ?? date,
+            timeSlot: details?.time_slot ?? '',
+          })
+        );
+      }
+
       return { assigned: true, agentId, reason: 'Auto-assigned' };
     }
 
@@ -292,6 +312,32 @@ export const collectionService = {
         // Non-fatal: log but don't block
         console.error('Failed to auto-create sample:', sampleErr);
       }
+    }
+
+    try {
+      const { data: details } = await admin
+        .from('collections')
+        .select('collection_id, patients(phone), agents(name)')
+        .eq('id', collectionId)
+        .single();
+      const patient = details?.patients as { phone?: string } | { phone?: string }[] | null;
+      const agent = details?.agents as { name?: string } | { name?: string }[] | null;
+      const phone = (Array.isArray(patient) ? patient[0] : patient)?.phone;
+      const agentName = (Array.isArray(agent) ? agent[0] : agent)?.name ?? 'our agent';
+      const publicId = details?.collection_id as string | undefined;
+
+      if (phone) {
+        const { notificationService } = await import('@/services/notification.service');
+        if (newStatus === 'on_the_way') {
+          void notificationService.notifyCollectionOnTheWay(phone, agentName);
+        } else if (newStatus === 'collected' && publicId) {
+          void notificationService.notifyCollectionCollected(phone, publicId);
+        } else if (newStatus === 'failed') {
+          void notificationService.notifyCollectionFailed(phone, remark || 'Unable to collect');
+        }
+      }
+    } catch (notifyErr) {
+      console.error('Failed to send collection notification:', notifyErr);
     }
 
     return data as Collection;

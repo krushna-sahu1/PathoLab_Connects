@@ -4,6 +4,7 @@ import { generateSampleId } from '@/lib/utils/ids';
 import type { Sample, SampleStatusHistory } from '@/types/sample';
 import type { Report } from '@/types/report';
 import type { CreateReportInput } from '@/lib/validation/sample';
+import { notificationService } from '@/services/notification.service';
 
 export type SampleStatus =
   | 'collected'
@@ -19,13 +20,19 @@ export type SampleWithDetails = Sample & {
     id: string;
     collection_id: string;
     date: string;
-    patients?: { id: string; full_name: string; phone: string } | null;
-    agents?: { id: string; name: string } | null;
+    time_slot?: string;
+    patients?: { id: string; full_name: string; phone: string; email?: string } | null;
+    agents?: { id: string; name: string; phone?: string } | null;
     zones?: { id: string; name: string } | null;
   } | null;
-  reports?: Report | null;
+  reports?: Report | Report[] | null;
   sample_status_history?: SampleStatusHistory[];
 };
+
+export function unwrapReport(reports: Report | Report[] | null | undefined): Report | null {
+  if (!reports) return null;
+  return Array.isArray(reports) ? reports[0] ?? null : reports;
+}
 
 export const sampleService = {
   async getSamples({
@@ -41,7 +48,7 @@ export const sampleService = {
     let query = supabase
       .from('samples')
       .select(
-        '*, collections!inner(id, collection_id, date, patients(id, full_name, phone), agents(id, name), zones(id, name)), reports(id, report_date, is_delivered)',
+        '*, collections!inner(id, collection_id, date, patients(id, full_name, phone), agents(id, name), zones(id, name)), reports(id, report_date, status, file_path)',
         { count: 'exact' }
       )
       .order('created_at', { ascending: false })
@@ -73,16 +80,16 @@ export const sampleService = {
       .from('samples')
       .select('*, reports(*)')
       .eq('collection_id', collectionId)
-      .single();
-    return data as (Sample & { reports?: Report | null }) | null;
+      .maybeSingle();
+    return data as (Sample & { reports?: Report | Report[] | null }) | null;
   },
 
   async getSamplesByPatient(patientId: string) {
-    const supabase = await createServerSupabaseClient();
+    const supabase = createAdminClient();
     const { data, error } = await supabase
       .from('samples')
       .select(
-        '*, collections!inner(id, collection_id, date, patient_id), reports(id, report_date, is_delivered, report_url)'
+        '*, collections!inner(id, collection_id, date, patient_id), reports(id, report_date, status, file_path)'
       )
       .eq('collections.patient_id', patientId)
       .order('created_at', { ascending: false })
@@ -91,26 +98,44 @@ export const sampleService = {
     return (data ?? []) as SampleWithDetails[];
   },
 
-  /**
-   * Auto-create a sample when collection reaches 'collected' status.
-   * Called by the collection service.
-   */
+  async getLatestSampleForPatient(patientId: string) {
+    const samples = await sampleService.getSamplesByPatient(patientId);
+    return samples[0] ?? null;
+  },
+
   async createFromCollection(collectionId: string, createdBy?: string): Promise<Sample> {
     const admin = createAdminClient();
+
+    const { data: existing } = await admin
+      .from('samples')
+      .select('*')
+      .eq('collection_id', collectionId)
+      .maybeSingle();
+    if (existing) return existing as Sample;
+
+    const { data: collection } = await admin
+      .from('collections')
+      .select('id, patient_id')
+      .eq('id', collectionId)
+      .single();
+    if (!collection) throw new Error('Collection not found');
+
     const sample_id = generateSampleId();
+    const now = new Date().toISOString();
 
     const { data, error } = await admin
       .from('samples')
       .insert({
         sample_id,
         collection_id: collectionId,
+        patient_id: collection.patient_id,
         status: 'collected',
+        collected_at: now,
       })
       .select()
       .single();
     if (error) throw new Error(error.message);
 
-    // Record initial status
     await admin.from('sample_status_history').insert({
       sample_id: data.id,
       previous_status: null,
@@ -138,9 +163,16 @@ export const sampleService = {
 
     if (!current) throw new Error('Sample not found');
 
+    const extra: Record<string, string> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (newStatus === 'received_at_lab') {
+      extra.received_at_lab = extra.updated_at;
+    }
+
     const { data, error } = await admin
       .from('samples')
-      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .update({ status: newStatus, ...extra })
       .eq('id', sampleId)
       .select()
       .single();
@@ -157,23 +189,43 @@ export const sampleService = {
     return data as Sample;
   },
 
-  // --- Reports ---
-
   async createReport(input: CreateReportInput, createdBy: string): Promise<Report> {
     const admin = createAdminClient();
+
+    const { data: sample } = await admin
+      .from('samples')
+      .select('id, sample_id, patient_id, patients(full_name, phone)')
+      .eq('id', input.sample_id)
+      .single();
+    if (!sample) throw new Error('Sample not found');
+
+    const now = new Date().toISOString();
     const { data, error } = await admin
       .from('reports')
       .insert({
-        ...input,
-        report_url: input.report_url || null,
+        patient_id: sample.patient_id,
+        sample_id: input.sample_id,
+        status: 'ready',
+        file_path: input.file_path || null,
+        report_date: input.report_date,
+        report_ready_at: now,
         lab_remarks: input.lab_remarks || null,
       })
       .select()
       .single();
     if (error) throw new Error(error.message);
 
-    // Auto-advance sample to report_ready
     await sampleService.updateStatus(input.sample_id, 'report_ready', createdBy, 'Report created');
+
+    const patient = sample.patients as { full_name?: string; phone?: string } | { full_name?: string; phone?: string }[] | null;
+    const p = Array.isArray(patient) ? patient[0] : patient;
+    if (p?.phone) {
+      void notificationService.notifyReportReady(
+        p.phone,
+        p.full_name ?? 'there',
+        sample.sample_id as string
+      );
+    }
 
     return data as Report;
   },
@@ -203,11 +255,23 @@ export const sampleService = {
     return { reports: data ?? [], total: count ?? 0 };
   },
 
+  async getReportsByPatient(patientId: string) {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from('reports')
+      .select('*, samples(id, sample_id)')
+      .eq('patient_id', patientId)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  },
+
   async markReportDelivered(reportId: string) {
     const admin = createAdminClient();
     const { data, error } = await admin
       .from('reports')
-      .update({ is_delivered: true, updated_at: new Date().toISOString() })
+      .update({ status: 'delivered', updated_at: new Date().toISOString() })
       .eq('id', reportId)
       .select()
       .single();
