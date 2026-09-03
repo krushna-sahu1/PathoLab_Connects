@@ -5,6 +5,19 @@ import { createServerClient } from '@supabase/ssr';
 // Routes that don't need authentication
 const PUBLIC_ROUTES = ['/', '/login', '/auth/callback', '/api/whatsapp'];
 
+function isPublicPath(pathname: string) {
+  if (
+    pathname === '/sw.js' ||
+    pathname === '/manifest.webmanifest' ||
+    pathname === '/icon.svg'
+  ) {
+    return true;
+  }
+  return PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith('/auth/')
+  );
+}
+
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -33,9 +46,7 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  const isPublic = PUBLIC_ROUTES.some((route) =>
-    pathname === route || pathname.startsWith('/auth/')
-  );
+  const isPublic = isPublicPath(pathname);
 
   // Not authenticated and trying to access protected route
   if (!user && !isPublic) {
