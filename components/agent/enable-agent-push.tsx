@@ -11,8 +11,22 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray;
 }
 
+async function saveSubscription(sub: PushSubscription) {
+  const res = await fetch('/api/push/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(sub.toJSON()),
+    redirect: 'manual',
+  });
+  if (!res.ok) return false;
+  const contentType = res.headers.get('content-type') ?? '';
+  if (!contentType.includes('application/json')) return false;
+  const data = (await res.json()) as { ok?: boolean };
+  return data.ok === true;
+}
+
 export function EnableAgentPush() {
-  const [status, setStatus] = useState<'idle' | 'on' | 'blocked' | 'missing'>('idle');
+  const [status, setStatus] = useState<'idle' | 'on' | 'blocked' | 'missing' | 'error'>('idle');
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
   useEffect(() => {
@@ -39,12 +53,8 @@ export function EnableAgentPush() {
           applicationServerKey: urlBase64ToUint8Array(publicKey),
         });
       }
-      const res = await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sub.toJSON()),
-      });
-      if (!cancelled && res.ok) setStatus('on');
+      const ok = await saveSubscription(sub);
+      if (!cancelled) setStatus(ok ? 'on' : 'error');
     })().catch(() => {
       if (!cancelled) setStatus('idle');
     });
@@ -66,17 +76,24 @@ export function EnableAgentPush() {
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(publicKey),
     });
-    const res = await fetch('/api/push/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(sub.toJSON()),
-    });
-    if (res.ok) setStatus('on');
+    const ok = await saveSubscription(sub);
+    setStatus(ok ? 'on' : 'error');
   }
 
   if (status === 'missing') return null;
   if (status === 'on') {
     return <p className="text-[11px] text-green-700">Job alerts on</p>;
+  }
+  if (status === 'error') {
+    return (
+      <button
+        type="button"
+        onClick={() => void enable()}
+        className="text-[11px] font-medium text-red-600 hover:underline"
+      >
+        Alerts not saved — retry
+      </button>
+    );
   }
 
   return (

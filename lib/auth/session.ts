@@ -46,6 +46,15 @@ export async function requireAuth(): Promise<User> {
 }
 
 /**
+ * API-route guard — returns JSON 401 instead of redirecting to /login.
+ * `requireAuth()` must not be used in Route Handlers: fetch() may follow the
+ * redirect and treat the login HTML as a successful response.
+ */
+export async function requireApiUser(): Promise<User | null> {
+  return getSessionUser();
+}
+
+/**
  * Server-side guard — throws if user doesn't have the required role.
  */
 export async function requireRole(allowedRoles: UserRole[]): Promise<User> {

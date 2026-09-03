@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth/session';
+import { requireApiUser } from '@/lib/auth/session';
 import { getAgentForUser } from '@/lib/auth/agent-auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function POST(request: Request) {
-  const user = await requireAuth();
+  const user = await requireApiUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const agent = await getAgentForUser(user.id);
   if (!agent) {
     return NextResponse.json({ error: 'No agent profile' }, { status: 403 });
@@ -35,7 +37,9 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const user = await requireAuth();
+  const user = await requireApiUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const body = (await request.json()) as { endpoint?: string };
   if (!body.endpoint) return NextResponse.json({ error: 'Missing endpoint' }, { status: 400 });
 

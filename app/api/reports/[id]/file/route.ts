@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth/session';
+import { requireApiUser } from '@/lib/auth/session';
 import { hasPermission } from '@/lib/auth/permissions';
 import { sampleService } from '@/services/sample.service';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isStorageObjectPath, REPORTS_BUCKET, SIGNED_URL_TTL_SECONDS } from '@/lib/reports/storage';
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
-  const user = await requireAuth();
+  const user = await requireApiUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (!hasPermission(user.role, 'reports:read')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
