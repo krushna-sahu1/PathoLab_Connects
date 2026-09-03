@@ -6,20 +6,20 @@ import type { CollectionStatus } from '@/types/collection';
 
 const AGENT_TRANSITIONS: Partial<Record<CollectionStatus, { value: CollectionStatus; label: string; color: string }[]>> = {
   assigned: [
-    { value: 'accepted', label: '✅ Accept Job', color: 'bg-blue-600 hover:bg-blue-700' },
-    { value: 'failed', label: '❌ Unable to Accept', color: 'bg-red-500 hover:bg-red-600' },
+    { value: 'accepted', label: '✅ Accept Job', color: 'bg-hp-ink hover:bg-hp-ink-soft' },
+    { value: 'failed', label: '❌ Unable to Accept', color: 'bg-hp-copper-deep hover:bg-hp-copper' },
   ],
   accepted: [
-    { value: 'on_the_way', label: '🚗 I\'m On The Way', color: 'bg-purple-600 hover:bg-purple-700' },
-    { value: 'failed', label: '❌ Cannot Proceed', color: 'bg-red-500 hover:bg-red-600' },
+    { value: 'on_the_way', label: '🚗 I\'m On The Way', color: 'bg-hp-copper hover:bg-hp-copper-deep' },
+    { value: 'failed', label: '❌ Cannot Proceed', color: 'bg-hp-copper-deep hover:bg-hp-copper' },
   ],
   on_the_way: [
-    { value: 'arrived', label: '📍 Arrived at Location', color: 'bg-yellow-500 hover:bg-yellow-600' },
-    { value: 'failed', label: '❌ Cannot Reach', color: 'bg-red-500 hover:bg-red-600' },
+    { value: 'arrived', label: '📍 Arrived at Location', color: 'bg-hp-copper hover:bg-hp-copper-deep' },
+    { value: 'failed', label: '❌ Cannot Reach', color: 'bg-hp-copper-deep hover:bg-hp-copper' },
   ],
   arrived: [
-    { value: 'collected', label: '🧪 Sample Collected ✓', color: 'bg-green-600 hover:bg-green-700' },
-    { value: 'failed', label: '❌ Unable to Collect', color: 'bg-red-500 hover:bg-red-600' },
+    { value: 'collected', label: '🧪 Sample Collected ✓', color: 'bg-hp-ink hover:bg-hp-ink-soft' },
+    { value: 'failed', label: '❌ Unable to Collect', color: 'bg-hp-copper-deep hover:bg-hp-copper' },
   ],
 };
 
@@ -51,7 +51,7 @@ export function AgentStatusUpdateForm({
   return (
     <div className="space-y-3">
       {state?.error && (
-        <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+        <div className="rounded-xl bg-hp-copper/10 border border-hp-copper/40 p-3 text-sm text-hp-copper-deep">
           {state.error}
         </div>
       )}
@@ -63,7 +63,7 @@ export function AgentStatusUpdateForm({
             <select
               name="failure_reason"
               required
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="w-full rounded-xl border border-hp-sand-2 bg-hp-paper px-4 py-3 text-base mb-2 focus:outline-none focus:ring-2 focus:ring-hp-copper"
             >
               <option value="">Select reason for failure…</option>
               {FAILURE_REASONS.map((r) => (
@@ -74,7 +74,7 @@ export function AgentStatusUpdateForm({
           <button
             type="submit"
             disabled={isPending}
-            className={`w-full h-14 rounded-xl text-white font-semibold text-base transition-colors disabled:opacity-50 ${option.color}`}
+            className={`w-full min-h-14 rounded-xl text-hp-paper font-semibold text-base disabled:opacity-50 ${option.color}`}
           >
             {isPending ? 'Updating…' : option.label}
           </button>

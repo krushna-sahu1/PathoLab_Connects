@@ -1,1 +1,81 @@
 @import "tailwindcss";
+
+@theme {
+  --color-hp-ink: #142924;
+  --color-hp-ink-soft: #1e3c34;
+  --color-hp-ink-muted: #4a675e;
+  --color-hp-sand: #f3ebe0;
+  --color-hp-sand-2: #e4d5c1;
+  --color-hp-paper: #fbf7f1;
+  --color-hp-copper: #c45c32;
+  --color-hp-copper-deep: #8f3a1a;
+  --font-hp-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-hp-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+}
+
+.agent-app,
+.marketing-page {
+  font-family: var(--font-hp-sans);
+  color: var(--color-hp-ink);
+  background-color: var(--color-hp-sand);
+}
+
+.marketing-page h1,
+.marketing-page h2,
+.agent-app .font-display {
+  font-family: var(--font-hp-serif);
+}
+
+/* Field forms inside the agent shell — larger targets, same actions */
+.agent-app select,
+.agent-app input[type="date"],
+.agent-app input[type="text"],
+.agent-app input:not([type]) {
+  min-height: 3rem;
+  border-radius: 0.85rem;
+  border-color: var(--color-hp-sand-2);
+  background: var(--color-hp-paper);
+  color: var(--color-hp-ink);
+  font-size: 1rem;
+}
+
+.agent-app select:focus,
+.agent-app input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-hp-ink);
+}
+
+.agent-app button[type="submit"] {
+  min-height: 3rem;
+  border-radius: 0.85rem;
+}
+
+/* Recolor shared availability + status widgets only inside the agent PWA */
+.agent-app .bg-green-100 {
+  background-color: color-mix(in srgb, var(--color-hp-ink) 14%, var(--color-hp-paper)) !important;
+  color: var(--color-hp-ink) !important;
+}
+
+.agent-app .bg-red-100,
+.agent-app .text-red-600,
+.agent-app .text-red-700,
+.agent-app .hover\:bg-red-50:hover {
+  color: var(--color-hp-copper-deep) !important;
+}
+
+.agent-app .bg-red-100 {
+  background-color: color-mix(in srgb, var(--color-hp-copper) 18%, var(--color-hp-paper)) !important;
+}
+
+.agent-app .bg-blue-600 {
+  background-color: var(--color-hp-ink) !important;
+}
+
+.agent-app .hover\:bg-blue-700:hover {
+  background-color: var(--color-hp-ink-soft) !important;
+}
+
+.agent-app .focus\:ring-blue-500:focus {
+  --tw-ring-color: var(--color-hp-ink);
+}

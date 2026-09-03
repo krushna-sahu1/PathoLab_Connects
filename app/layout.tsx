@@ -1,6 +1,19 @@
 import type { Metadata, Viewport } from 'next';
+import { Fraunces, Figtree } from 'next/font/google';
 import './globals.css';
 import { RegisterServiceWorker } from '@/components/agent/register-service-worker';
+
+const figtree = Figtree({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-figtree',
+});
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-fraunces',
+});
 
 export const metadata: Metadata = {
   title: 'Hypatho Connects',
@@ -10,14 +23,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#2563eb',
+  themeColor: '#142924',
   width: 'device-width',
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${figtree.variable} ${fraunces.variable}`}>
       <body>
         <RegisterServiceWorker />
         {children}

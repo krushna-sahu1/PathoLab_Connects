@@ -14,26 +14,21 @@ export const metadata: Metadata = {
 
 export default function AgentLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Top bar */}
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center">
-            <span className="text-white text-xs font-bold">H</span>
+    <div className="agent-app min-h-dvh flex flex-col">
+      <header className="sticky top-0 z-40 bg-hp-ink text-hp-paper px-4 py-3 flex items-center gap-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-hp-copper flex items-center justify-center shrink-0">
+            <span className="text-hp-paper text-sm font-bold">H</span>
           </div>
-          <span className="font-semibold text-gray-900 text-sm">Hypatho Agent</span>
+          <span className="font-display font-semibold text-base truncate">Hypatho Agent</span>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto shrink-0">
           <EnableAgentPush />
         </div>
       </header>
 
-      {/* Page content with bottom padding for nav bar */}
-      <main className="flex-1 px-4 py-4 pb-24">
-        {children}
-      </main>
+      <main className="flex-1 px-4 py-5 pb-28 max-w-lg mx-auto w-full">{children}</main>
 
-      {/* Bottom navigation */}
       <AgentBottomNav />
     </div>
   );
