@@ -366,7 +366,7 @@ async function getReport(patientId: string) {
   const lines = [
     `Report for ${sampleId} is ${latest.status}.`,
     latest.report_date ? `Date: ${latest.report_date}` : '',
-    latest.file_path ? `Download: ${latest.file_path}` : 'Our team will share the file shortly.',
+    'We do not send a download link here. Visit the lab or ask support to share the report securely.',
     '',
     WHATSAPP_TEMPLATES.MAIN_MENU(),
   ];

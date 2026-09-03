@@ -26,14 +26,14 @@ export function ReportForm({ sampleId }: { sampleId: string }) {
       </div>
 
       <div className="space-y-1">
-        <label className="block text-sm font-medium text-gray-700">Report URL</label>
+        <label className="block text-sm font-medium text-gray-700">Report PDF</label>
         <input
-          name="file_path"
-          type="url"
-          placeholder="https://storage.example.com/report.pdf"
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          name="file"
+          type="file"
+          accept="application/pdf,.pdf"
+          className="w-full text-sm text-gray-700"
         />
-        <p className="text-xs text-gray-400">Link to the report PDF (Supabase Storage or external URL)</p>
+        <p className="text-xs text-gray-400">Stored privately in Supabase Storage. Staff download via a short-lived signed URL.</p>
       </div>
 
       <div className="space-y-1">

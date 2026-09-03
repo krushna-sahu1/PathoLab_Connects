@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { AgentBottomNav } from '@/components/agent/agent-bottom-nav';
+import { EnableAgentPush } from '@/components/agent/enable-agent-push';
 
 export const metadata: Metadata = {
   title: 'Hypatho — Agent App',
@@ -21,6 +22,9 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
             <span className="text-white text-xs font-bold">H</span>
           </div>
           <span className="font-semibold text-gray-900 text-sm">Hypatho Agent</span>
+        </div>
+        <div className="ml-auto">
+          <EnableAgentPush />
         </div>
       </header>
 

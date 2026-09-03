@@ -4,6 +4,8 @@ import { requireAuth } from '@/lib/auth/session';
 import { hasPermission } from '@/lib/auth/permissions';
 import { sampleService } from '@/services/sample.service';
 import { MarkDeliveredButton } from '@/components/samples/mark-delivered-button';
+import { ReportDownloadLink } from '@/components/samples/report-download-link';
+import { isStorageObjectPath } from '@/lib/reports/storage';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -88,16 +90,16 @@ export default async function ReportDetailPage({ params }: PageProps) {
           )}
         </dl>
 
-        {report.file_path && (
-          <a
-            href={report.file_path}
-            target="_blank"
-            rel="noopener noreferrer"
+        {isStorageObjectPath(report.file_path) ? (
+          <ReportDownloadLink
+            reportId={id}
             className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
           >
-            📄 Download Report
-          </a>
-        )}
+            Download Report
+          </ReportDownloadLink>
+        ) : report.file_path ? (
+          <p className="text-sm text-amber-700">This report used a public URL. Re-upload a PDF so it is served with a signed link.</p>
+        ) : null}
 
         {canWrite && report.status !== 'delivered' && (
           <MarkDeliveredButton reportId={id} sampleId={sample?.id ?? ''} />

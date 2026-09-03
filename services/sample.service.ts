@@ -5,6 +5,7 @@ import type { Sample, SampleStatusHistory } from '@/types/sample';
 import type { Report } from '@/types/report';
 import type { CreateReportInput } from '@/lib/validation/sample';
 import { notificationService } from '@/services/notification.service';
+import { REPORTS_BUCKET } from '@/lib/reports/storage';
 
 export type SampleStatus =
   | 'collected'
@@ -187,6 +188,31 @@ export const sampleService = {
     });
 
     return data as Sample;
+  },
+
+  async uploadReportPdf(sampleId: string, file: File): Promise<string> {
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      throw new Error('Report file must be a PDF');
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error('Report PDF must be 10 MB or smaller');
+    }
+
+    const admin = createAdminClient();
+    const { data: sample } = await admin
+      .from('samples')
+      .select('id, patient_id')
+      .eq('id', sampleId)
+      .single();
+    if (!sample?.patient_id) throw new Error('Sample not found');
+
+    const path = `${sample.patient_id}/${sample.id}/${crypto.randomUUID()}.pdf`;
+    const { error } = await admin.storage.from(REPORTS_BUCKET).upload(path, file, {
+      contentType: 'application/pdf',
+      upsert: false,
+    });
+    if (error) throw new Error(error.message);
+    return path;
   },
 
   async createReport(input: CreateReportInput, createdBy: string): Promise<Report> {

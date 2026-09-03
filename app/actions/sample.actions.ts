@@ -47,9 +47,20 @@ export async function updateSampleStatusAction(
 export async function createReportAction(_prev: unknown, formData: FormData) {
   const user = await requireRole(['super_admin', 'operations_admin']);
 
+  const sampleId = formData.get('sample_id');
+  const file = formData.get('file');
+  let filePath: string | undefined;
+  try {
+    if (file instanceof File && file.size > 0) {
+      filePath = await sampleService.uploadReportPdf(String(sampleId), file);
+    }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Upload failed' };
+  }
+
   const parsed = createReportSchema.safeParse({
-    sample_id: formData.get('sample_id'),
-    file_path: formData.get('file_path') || formData.get('report_url') || undefined,
+    sample_id: sampleId,
+    file_path: filePath,
     report_date: formData.get('report_date'),
     lab_remarks: formData.get('lab_remarks') || undefined,
   });
@@ -62,7 +73,7 @@ export async function createReportAction(_prev: unknown, formData: FormData) {
       action: 'CREATE',
       resource_type: 'report',
       resource_id: report.id,
-      new_values: parsed.data,
+      new_values: { sample_id: parsed.data.sample_id, file_path: parsed.data.file_path ? 'stored' : null },
     });
     revalidatePath(`/samples/${parsed.data.sample_id}`);
     revalidatePath('/reports');
