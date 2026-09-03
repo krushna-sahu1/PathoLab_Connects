@@ -39,7 +39,13 @@ export function LoginForm() {
       return;
     }
 
-    router.push('/dashboard');
+    const { data: agentRecord } = await supabase
+      .from('agents')
+      .select('id')
+      .eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '')
+      .maybeSingle();
+
+    router.push(agentRecord ? '/agent' : '/dashboard');
     router.refresh();
   };
 
