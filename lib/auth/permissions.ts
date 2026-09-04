@@ -54,3 +54,27 @@ export function requirePermission(role: UserRole, permission: string): void {
     throw new Error(`Unauthorized: missing permission '${permission}'`);
   }
 }
+
+/** Higher number = more privilege. Equal ranks cannot grant each other. */
+export const ROLE_RANK: Record<UserRole, number> = {
+  viewer: 1,
+  collection_agent: 2,
+  support_agent: 2,
+  logistics_manager: 3,
+  operations_admin: 4,
+  super_admin: 5,
+};
+
+export function canChangeUserRoles(actor: UserRole): boolean {
+  return actor === 'super_admin';
+}
+
+/** Granting Super Admin requires being Super Admin. All other grants must be strictly below the actor. */
+export function canGrantRole(actor: UserRole, granted: UserRole): boolean {
+  if (granted === 'super_admin') return actor === 'super_admin';
+  return ROLE_RANK[granted] < ROLE_RANK[actor];
+}
+
+export function canManageUserAccount(actor: UserRole, target: UserRole): boolean {
+  return ROLE_RANK[target] < ROLE_RANK[actor];
+}
