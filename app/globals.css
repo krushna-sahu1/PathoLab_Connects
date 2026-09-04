@@ -15,7 +15,8 @@
 }
 
 .agent-app,
-.marketing-page {
+.marketing-page,
+.staff-app {
   font-family: var(--font-hp-sans);
   color: var(--color-hp-ink);
   background-color: var(--color-hp-sand);
@@ -23,7 +24,8 @@
 
 .marketing-page h1,
 .marketing-page h2,
-.agent-app .font-display {
+.agent-app .font-display,
+.staff-app .font-display {
   font-family: var(--font-hp-serif);
 }
 

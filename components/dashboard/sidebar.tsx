@@ -30,9 +30,10 @@ const NAV_ITEMS: NavItem[] = [
 
 interface SidebarProps {
   user: User;
+  onNavigate?: () => void;
 }
 
-export function Sidebar({ user }: SidebarProps) {
+export function Sidebar({ user, onNavigate }: SidebarProps) {
   const pathname = usePathname();
 
   const visibleItems = NAV_ITEMS.filter((item) =>
@@ -40,15 +41,13 @@ export function Sidebar({ user }: SidebarProps) {
   );
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
-      {/* Logo */}
-      <div className="px-6 py-5 border-b border-gray-200">
-        <h1 className="text-lg font-bold text-gray-900">Hypatho</h1>
-        <p className="text-xs text-gray-500 mt-0.5">Connects</p>
+    <aside className="w-64 h-full bg-hp-ink text-hp-paper flex flex-col">
+      <div className="px-5 py-5 border-b border-white/10">
+        <h1 className="font-display text-lg font-semibold">Hypatho</h1>
+        <p className="text-xs text-hp-sand mt-0.5">Connects</p>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {visibleItems.map((item) => {
           const isActive =
             item.href === '/dashboard'
@@ -58,10 +57,9 @@ export function Sidebar({ user }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              onClick={onNavigate}
+              className={`flex items-center gap-3 min-h-11 px-3 py-2 rounded-xl text-sm font-medium ${
+                isActive ? 'bg-hp-copper text-hp-paper' : 'text-hp-sand/90'
               }`}
             >
               <span>{item.icon}</span>
@@ -71,15 +69,14 @@ export function Sidebar({ user }: SidebarProps) {
         })}
       </nav>
 
-      {/* User info */}
-      <div className="px-4 py-4 border-t border-gray-200">
+      <div className="px-4 py-4 border-t border-white/10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-semibold text-sm">
+          <div className="w-8 h-8 rounded-lg bg-hp-copper flex items-center justify-center text-hp-paper font-semibold text-sm">
             {user.full_name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">{user.full_name}</p>
-            <p className="text-xs text-gray-500 truncate">{user.role.replace('_', ' ')}</p>
+            <p className="text-sm font-medium truncate">{user.full_name}</p>
+            <p className="text-xs text-hp-sand/80 truncate">{user.role.replace('_', ' ')}</p>
           </div>
         </div>
       </div>
