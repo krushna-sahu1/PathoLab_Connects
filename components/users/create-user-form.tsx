@@ -2,8 +2,10 @@
 
 import { useActionState } from 'react';
 import { createUserAction } from '@/app/actions/user.actions';
+import { canGrantRole } from '@/lib/auth/permissions';
+import type { UserRole } from '@/types/auth';
 
-const ROLES = [
+const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: 'operations_admin', label: 'Operations Admin' },
   { value: 'logistics_manager', label: 'Logistics Manager' },
   { value: 'collection_agent', label: 'Collection Agent' },
@@ -12,8 +14,9 @@ const ROLES = [
   { value: 'super_admin', label: 'Super Admin' },
 ];
 
-export function CreateUserForm() {
+export function CreateUserForm({ actorRole }: { actorRole: UserRole }) {
   const [state, formAction, isPending] = useActionState(createUserAction, null);
+  const roles = ROLE_OPTIONS.filter((r) => canGrantRole(actorRole, r.value));
 
   return (
     <form action={formAction} className="bg-white rounded-lg border border-gray-200 p-5 space-y-4">
@@ -28,7 +31,7 @@ export function CreateUserForm() {
         <input name="full_name" required placeholder="Full name" className="rounded-md border border-gray-300 px-3 py-2 text-sm" />
         <input name="email" type="email" required placeholder="Email" className="rounded-md border border-gray-300 px-3 py-2 text-sm" />
         <select name="role" required className="rounded-md border border-gray-300 px-3 py-2 text-sm">
-          {ROLES.map((r) => (
+          {roles.map((r) => (
             <option key={r.value} value={r.value}>{r.label}</option>
           ))}
         </select>

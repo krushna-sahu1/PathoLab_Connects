@@ -1,11 +1,13 @@
 import { requireRole } from '@/lib/auth/session';
 import { userService } from '@/services/user.service';
+import { canChangeUserRoles } from '@/lib/auth/permissions';
 import { CreateUserForm } from '@/components/users/create-user-form';
 import { UserRowActions } from '@/components/users/user-row-actions';
 
 export default async function UsersPage() {
-  await requireRole(['super_admin', 'operations_admin']);
+  const actor = await requireRole(['super_admin', 'operations_admin']);
   const users = await userService.listUsers();
+  const canChangeRole = canChangeUserRoles(actor.role);
 
   return (
     <div className="space-y-6">
@@ -14,7 +16,7 @@ export default async function UsersPage() {
         <p className="mt-1 text-sm text-gray-500">Staff accounts and roles</p>
       </div>
 
-      <CreateUserForm />
+      <CreateUserForm actorRole={actor.role} />
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
@@ -39,7 +41,7 @@ export default async function UsersPage() {
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <UserRowActions userId={u.id} role={u.role} isActive={u.is_active} />
+                  <UserRowActions userId={u.id} role={u.role} isActive={u.is_active} canChangeRole={canChangeRole} />
                 </td>
               </tr>
             ))}

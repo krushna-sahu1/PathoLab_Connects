@@ -64,6 +64,18 @@ export const userService = {
     return created.user.id;
   },
 
+  async getRole(userId: string): Promise<UserRole | null> {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from('user_roles')
+      .select('roles(name)')
+      .eq('user_id', userId)
+      .maybeSingle();
+    const linked = data?.roles as { name?: string } | { name?: string }[] | null;
+    const name = Array.isArray(linked) ? linked[0]?.name : linked?.name;
+    return (name as UserRole | undefined) ?? null;
+  },
+
   async setRole(userId: string, role: UserRole) {
     const admin = createAdminClient();
     const { data: roleRow } = await admin.from('roles').select('id').eq('name', role).single();
