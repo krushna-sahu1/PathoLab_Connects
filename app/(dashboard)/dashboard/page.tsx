@@ -30,13 +30,13 @@ export default async function DashboardPage() {
   const stats = await getStats();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Operations Dashboard</h2>
-        <p className="mt-1 text-sm text-gray-500">Welcome back, {user.full_name}</p>
+        <h2 className="font-display text-2xl font-semibold text-hp-ink">Operations Dashboard</h2>
+        <p className="mt-1 text-sm text-hp-ink-muted">Welcome back, {user.full_name}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
         <StatCard label="Patients" value={String(stats.patients)} icon="👤" href="/patients" />
         <StatCard label="Collections Today" value={String(stats.collectionsToday)} icon="🧪" href="/collections" />
         <StatCard label="Samples In Transit" value={String(stats.samplesInTransit)} icon="🔬" href="/samples" />
@@ -57,10 +57,10 @@ export default async function DashboardPage() {
       </div>
 
       {stats.opsQueue > 0 && (
-        <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
-          <p className="text-sm text-amber-800">
+        <div className="rounded-2xl bg-hp-copper/10 border border-hp-copper/30 p-4">
+          <p className="text-sm text-hp-ink">
             <strong>⚠ {stats.opsQueue} collection{stats.opsQueue !== 1 ? 's' : ''}</strong> in the operations queue need manual assignment.
-            <Link href="/collections?status=new" className="ml-2 underline font-medium">View now →</Link>
+            <Link href="/collections?status=new" className="ml-2 underline font-medium text-hp-copper-deep">View now →</Link>
           </p>
         </div>
       )}
@@ -80,14 +80,16 @@ function StatCard({
   return (
     <Link
       href={href}
-      className={`block rounded-lg border p-5 flex items-center gap-4 hover:shadow-sm transition-all ${
-        highlight ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-200 hover:border-blue-300'
+      className={`block rounded-2xl border p-5 min-h-[5.5rem] flex items-center gap-4 ${
+        highlight
+          ? 'bg-hp-copper/10 border-hp-copper/30'
+          : 'bg-hp-paper border-hp-sand-2'
       }`}
     >
       <span className="text-2xl">{icon}</span>
       <div>
-        <p className="text-sm text-gray-500">{label}</p>
-        <p className={`text-xl font-bold ${highlight ? 'text-amber-700' : 'text-gray-900'}`}>{value}</p>
+        <p className="text-sm text-hp-ink-muted">{label}</p>
+        <p className={`text-xl font-bold ${highlight ? 'text-hp-copper-deep' : 'text-hp-ink'}`}>{value}</p>
       </div>
     </Link>
   );

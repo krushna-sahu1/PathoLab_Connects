@@ -11,11 +11,11 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="marketing-page min-h-dvh flex items-center justify-center px-5 py-10">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Hypatho Connects</h1>
-          <p className="mt-2 text-sm text-gray-600">Sign in to your account</p>
+          <h1 className="font-display text-3xl font-semibold text-hp-ink">Hypatho Connects</h1>
+          <p className="mt-2 text-sm text-hp-ink-muted">Sign in to your account</p>
         </div>
         <LoginForm />
       </div>

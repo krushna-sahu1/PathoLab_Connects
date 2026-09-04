@@ -52,16 +52,16 @@ export function LoginForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white shadow-md rounded-lg px-8 py-10 space-y-6"
+      className="bg-hp-paper border border-hp-sand-2 rounded-2xl px-6 py-8 sm:px-8 sm:py-10 space-y-6"
     >
       {error && (
-        <div className="rounded-md bg-red-50 p-4 text-sm text-red-700 border border-red-200">
+        <div className="rounded-xl bg-hp-copper/10 p-4 text-sm text-hp-copper-deep border border-hp-copper/30">
           {error}
         </div>
       )}
 
       <div className="space-y-1">
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="email" className="block text-sm font-medium text-hp-ink">
           Email
         </label>
         <input
@@ -72,13 +72,13 @@ export function LoginForm() {
           required
           value={form.email}
           onChange={handleChange}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full min-h-12 rounded-xl border border-hp-sand-2 bg-hp-sand px-4 py-3 text-base text-hp-ink placeholder-hp-ink-muted focus:outline-none focus:ring-2 focus:ring-hp-ink"
           placeholder="you@example.com"
         />
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="password" className="block text-sm font-medium text-hp-ink">
           Password
         </label>
         <input
@@ -89,7 +89,7 @@ export function LoginForm() {
           required
           value={form.password}
           onChange={handleChange}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full min-h-12 rounded-xl border border-hp-sand-2 bg-hp-sand px-4 py-3 text-base text-hp-ink placeholder-hp-ink-muted focus:outline-none focus:ring-2 focus:ring-hp-ink"
           placeholder="••••••••"
         />
       </div>
@@ -97,7 +97,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full min-h-12 rounded-xl bg-hp-ink px-4 py-3 text-base font-semibold text-hp-paper disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? 'Signing in…' : 'Sign In'}
       </button>
