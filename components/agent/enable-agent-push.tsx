@@ -82,14 +82,14 @@ export function EnableAgentPush() {
 
   if (status === 'missing') return null;
   if (status === 'on') {
-    return <p className="text-[11px] text-green-700">Job alerts on</p>;
+    return <p className="text-[11px] font-semibold text-hp-sand">Job alerts on</p>;
   }
   if (status === 'error') {
     return (
       <button
         type="button"
         onClick={() => void enable()}
-        className="text-[11px] font-medium text-red-600 hover:underline"
+        className="min-h-11 px-2 text-[11px] font-semibold text-hp-copper"
       >
         Alerts not saved — retry
       </button>
@@ -100,7 +100,7 @@ export function EnableAgentPush() {
     <button
       type="button"
       onClick={() => void enable()}
-      className="text-[11px] font-medium text-blue-600 hover:underline"
+      className="min-h-11 px-2 text-[11px] font-semibold text-hp-sand underline-offset-2"
     >
       {status === 'blocked' ? 'Notifications blocked' : 'Enable job alerts'}
     </button>
